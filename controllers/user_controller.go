@@ -1,8 +1,6 @@
 package controllers
 
 import (
-	"strconv"
-
 	"github.com/gofiber/fiber/v3"
 	"simplcommerce/services/implementations"
 )
@@ -16,8 +14,8 @@ func NewUserController(userService *implementations.UserService) *UserController
 }
 
 func (ctrl *UserController) List(c fiber.Ctx) error {
-	page, _ := strconv.Atoi(c.Query("page", "1"))
-	pageSize, _ := strconv.Atoi(c.Query("pageSize", "10"))
+	page := parseInt(c.Query("page", "1"), 1)
+	pageSize := parseInt(c.Query("pageSize", "10"), 10)
 
 	if page < 1 {
 		page = 1
@@ -40,12 +38,12 @@ func (ctrl *UserController) List(c fiber.Ctx) error {
 }
 
 func (ctrl *UserController) Get(c fiber.Ctx) error {
-	id, err := strconv.ParseUint(c.Params("id"), 10, 32)
-	if err != nil {
+	id := c.Params("id")
+	if id == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid user ID"})
 	}
 
-	user, err := ctrl.userService.FindByID(c.Context(), uint(id))
+	user, err := ctrl.userService.FindByID(c.Context(), id)
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "User not found"})
 	}
@@ -54,8 +52,8 @@ func (ctrl *UserController) Get(c fiber.Ctx) error {
 }
 
 func (ctrl *UserController) Update(c fiber.Ctx) error {
-	id, err := strconv.ParseUint(c.Params("id"), 10, 32)
-	if err != nil {
+	id := c.Params("id")
+	if id == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid user ID"})
 	}
 
@@ -64,7 +62,7 @@ func (ctrl *UserController) Update(c fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request body"})
 	}
 
-	user, err := ctrl.userService.Update(c.Context(), uint(id), req)
+	user, err := ctrl.userService.Update(c.Context(), id, req)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
@@ -73,12 +71,12 @@ func (ctrl *UserController) Update(c fiber.Ctx) error {
 }
 
 func (ctrl *UserController) Delete(c fiber.Ctx) error {
-	id, err := strconv.ParseUint(c.Params("id"), 10, 32)
-	if err != nil {
+	id := c.Params("id")
+	if id == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid user ID"})
 	}
 
-	if err := ctrl.userService.Delete(c.Context(), uint(id)); err != nil {
+	if err := ctrl.userService.Delete(c.Context(), id); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 

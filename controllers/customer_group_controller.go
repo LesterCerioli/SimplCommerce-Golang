@@ -1,8 +1,6 @@
 package controllers
 
 import (
-	"strconv"
-
 	"github.com/gofiber/fiber/v3"
 	"simplcommerce/services/implementations"
 )
@@ -43,8 +41,8 @@ func (ctrl *CustomerGroupController) Create(c fiber.Ctx) error {
 }
 
 func (ctrl *CustomerGroupController) Update(c fiber.Ctx) error {
-	id, err := strconv.ParseUint(c.Params("id"), 10, 32)
-	if err != nil {
+	id := c.Params("id")
+	if id == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid customer group ID"})
 	}
 
@@ -53,7 +51,7 @@ func (ctrl *CustomerGroupController) Update(c fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request body"})
 	}
 
-	group, err := ctrl.groupService.Update(c.Context(), uint(id), req)
+	group, err := ctrl.groupService.Update(c.Context(), id, req)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
@@ -62,12 +60,12 @@ func (ctrl *CustomerGroupController) Update(c fiber.Ctx) error {
 }
 
 func (ctrl *CustomerGroupController) Delete(c fiber.Ctx) error {
-	id, err := strconv.ParseUint(c.Params("id"), 10, 32)
-	if err != nil {
+	id := c.Params("id")
+	if id == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid customer group ID"})
 	}
 
-	if err := ctrl.groupService.Delete(c.Context(), uint(id)); err != nil {
+	if err := ctrl.groupService.Delete(c.Context(), id); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 

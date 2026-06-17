@@ -13,21 +13,21 @@ type ProductService struct {
 }
 
 type CategoryBrief struct {
-	ID   uint   `json:"id"`
+	ID   string `json:"id"`
 	Name string `json:"name"`
 	Slug string `json:"slug"`
 }
 
 type AttributeValueResponse struct {
-	ID            uint   `json:"id"`
-	AttributeID   uint   `json:"attributeId"`
+	ID            string `json:"id"`
+	AttributeID   string `json:"attributeId"`
 	AttributeName string `json:"attributeName"`
 	Value         string `json:"value"`
 }
 
 type OptionValueResponse struct {
-	ID          uint   `json:"id"`
-	OptionID    uint   `json:"optionId"`
+	ID          string `json:"id"`
+	OptionID    string `json:"optionId"`
 	OptionName  string `json:"optionName"`
 	Value       string `json:"value"`
 	DisplayType string `json:"displayType"`
@@ -35,62 +35,62 @@ type OptionValueResponse struct {
 }
 
 type ProductResponse struct {
-	ID                     uint                    `json:"id"`
-	Name                   string                  `json:"name"`
-	Slug                   string                  `json:"slug"`
-	ShortDescription       string                  `json:"shortDescription"`
-	Description            string                  `json:"description"`
-	Specification          string                  `json:"specification"`
-	Price                  float64                 `json:"price"`
-	OldPrice               *float64                `json:"oldPrice,omitempty"`
-	SpecialPrice           *float64                `json:"specialPrice,omitempty"`
-	SpecialPriceStart      *time.Time              `json:"specialPriceStart,omitempty"`
-	SpecialPriceEnd        *time.Time              `json:"specialPriceEnd,omitempty"`
-	HasOptions             bool                    `json:"hasOptions"`
-	IsVisibleIndividually  bool                    `json:"isVisibleIndividually"`
-	IsFeatured             bool                    `json:"isFeatured"`
-	IsCallForPricing       bool                    `json:"isCallForPricing"`
-	IsAllowToOrder         bool                    `json:"isAllowToOrder"`
-	StockTrackingIsEnabled bool                    `json:"stockTrackingIsEnabled"`
-	StockQuantity          int                     `json:"stockQuantity"`
-	SKU                    string                  `json:"sku"`
-	GTIN                   string                  `json:"gtin"`
-	NormalizedName         string                  `json:"normalizedName"`
-	DisplayOrder           int                     `json:"displayOrder"`
-	ReviewsCount           int                     `json:"reviewsCount"`
-	RatingAverage          *float64                `json:"ratingAverage,omitempty"`
-	BrandID                *uint                   `json:"brandId,omitempty"`
-	BrandName              string                  `json:"brandName,omitempty"`
-	TaxClassID             *uint                   `json:"taxClassId,omitempty"`
-	ThumbnailImageID       *uint                   `json:"thumbnailImageId,omitempty"`
-	IsPublished            bool                    `json:"isPublished"`
-	PublishedOn            *time.Time              `json:"publishedOn,omitempty"`
-	CreatedAt              time.Time               `json:"createdAt"`
-	UpdatedAt              time.Time               `json:"updatedAt"`
-	Categories             []*CategoryBrief        `json:"categories,omitempty"`
+	ID                     string                   `json:"id"`
+	Name                   string                   `json:"name"`
+	Slug                   string                   `json:"slug"`
+	ShortDescription       string                   `json:"shortDescription"`
+	Description            string                   `json:"description"`
+	Specification          string                   `json:"specification"`
+	Price                  float64                  `json:"price"`
+	OldPrice               *float64                 `json:"oldPrice,omitempty"`
+	SpecialPrice           *float64                 `json:"specialPrice,omitempty"`
+	SpecialPriceStart      *time.Time               `json:"specialPriceStart,omitempty"`
+	SpecialPriceEnd        *time.Time               `json:"specialPriceEnd,omitempty"`
+	HasOptions             bool                     `json:"hasOptions"`
+	IsVisibleIndividually  bool                     `json:"isVisibleIndividually"`
+	IsFeatured             bool                     `json:"isFeatured"`
+	IsCallForPricing       bool                     `json:"isCallForPricing"`
+	IsAllowToOrder         bool                     `json:"isAllowToOrder"`
+	StockTrackingIsEnabled bool                     `json:"stockTrackingIsEnabled"`
+	StockQuantity          int                      `json:"stockQuantity"`
+	SKU                    string                   `json:"sku"`
+	GTIN                   string                   `json:"gtin"`
+	NormalizedName         string                   `json:"normalizedName"`
+	DisplayOrder           int                      `json:"displayOrder"`
+	ReviewsCount           int                      `json:"reviewsCount"`
+	RatingAverage          *float64                 `json:"ratingAverage,omitempty"`
+	BrandID                *string                  `json:"brandId,omitempty"`
+	BrandName              string                   `json:"brandName,omitempty"`
+	TaxClassID             *string                  `json:"taxClassId,omitempty"`
+	ThumbnailImageID       *string                  `json:"thumbnailImageId,omitempty"`
+	IsPublished            bool                     `json:"isPublished"`
+	PublishedOn            *time.Time               `json:"publishedOn,omitempty"`
+	CreatedAt              time.Time                `json:"createdAt"`
+	UpdatedAt              time.Time                `json:"updatedAt"`
+	Categories             []*CategoryBrief         `json:"categories,omitempty"`
 	AttributeValues        []*AttributeValueResponse `json:"attributeValues,omitempty"`
 	OptionValues           []*OptionValueResponse    `json:"optionValues,omitempty"`
 	Medias                 []*MediaResponse          `json:"medias,omitempty"`
 }
 
 type ProductListItem struct {
-	ID                     uint       `json:"id"`
-	Name                   string     `json:"name"`
-	Slug                   string     `json:"slug"`
-	ShortDescription       string     `json:"shortDescription"`
-	Price                  float64    `json:"price"`
-	OldPrice               *float64   `json:"oldPrice,omitempty"`
-	SpecialPrice           *float64   `json:"specialPrice,omitempty"`
-	IsFeatured             bool       `json:"isFeatured"`
-	StockQuantity          int        `json:"stockQuantity"`
-	SKU                    string     `json:"sku"`
-	GTIN                   string     `json:"gtin"`
-	BrandID                *uint      `json:"brandId,omitempty"`
-	BrandName              string     `json:"brandName,omitempty"`
-	ThumbnailImageID       *uint      `json:"thumbnailImageId,omitempty"`
-	IsPublished            bool       `json:"isPublished"`
-	CreatedAt              time.Time  `json:"createdAt"`
-	UpdatedAt              time.Time  `json:"updatedAt"`
+	ID                string    `json:"id"`
+	Name              string    `json:"name"`
+	Slug              string    `json:"slug"`
+	ShortDescription  string    `json:"shortDescription"`
+	Price             float64   `json:"price"`
+	OldPrice          *float64  `json:"oldPrice,omitempty"`
+	SpecialPrice      *float64  `json:"specialPrice,omitempty"`
+	IsFeatured        bool      `json:"isFeatured"`
+	StockQuantity     int       `json:"stockQuantity"`
+	SKU               string    `json:"sku"`
+	GTIN              string    `json:"gtin"`
+	BrandID           *string   `json:"brandId,omitempty"`
+	BrandName         string    `json:"brandName,omitempty"`
+	ThumbnailImageID  *string   `json:"thumbnailImageId,omitempty"`
+	IsPublished       bool      `json:"isPublished"`
+	CreatedAt         time.Time `json:"createdAt"`
+	UpdatedAt         time.Time `json:"updatedAt"`
 }
 
 type CreateProductRequest struct {
@@ -114,22 +114,22 @@ type CreateProductRequest struct {
 	SKU                   string             `json:"sku,omitempty"`
 	GTIN                  string             `json:"gtin,omitempty"`
 	DisplayOrder          int                `json:"displayOrder,omitempty"`
-	BrandID               *uint              `json:"brandId,omitempty"`
-	TaxClassID            *uint              `json:"taxClassId,omitempty"`
-	ThumbnailImageID      *uint              `json:"thumbnailImageId,omitempty"`
+	BrandID               *string            `json:"brandId,omitempty"`
+	TaxClassID            *string            `json:"taxClassId,omitempty"`
+	ThumbnailImageID      *string            `json:"thumbnailImageId,omitempty"`
 	IsPublished           bool               `json:"isPublished,omitempty"`
-	CategoryIDs           []uint             `json:"categoryIds,omitempty"`
+	CategoryIDs           []string           `json:"categoryIds,omitempty"`
 	AttributeValues       []AttributeValueReq `json:"attributeValues,omitempty"`
 	OptionValues          []OptionValueReq    `json:"optionValues,omitempty"`
 }
 
 type AttributeValueReq struct {
-	AttributeID uint   `json:"attributeId"`
+	AttributeID string `json:"attributeId"`
 	Value       string `json:"value"`
 }
 
 type OptionValueReq struct {
-	OptionID    uint   `json:"optionId"`
+	OptionID    string `json:"optionId"`
 	Value       string `json:"value"`
 	DisplayType string `json:"displayType"`
 	SortIndex   int    `json:"sortIndex"`
@@ -156,11 +156,11 @@ type UpdateProductRequest struct {
 	SKU                   string             `json:"sku,omitempty"`
 	GTIN                  string             `json:"gtin,omitempty"`
 	DisplayOrder          int                `json:"displayOrder,omitempty"`
-	BrandID               *uint              `json:"brandId,omitempty"`
-	TaxClassID            *uint              `json:"taxClassId,omitempty"`
-	ThumbnailImageID      *uint              `json:"thumbnailImageId,omitempty"`
+	BrandID               *string            `json:"brandId,omitempty"`
+	TaxClassID            *string            `json:"taxClassId,omitempty"`
+	ThumbnailImageID      *string            `json:"thumbnailImageId,omitempty"`
 	IsPublished           bool               `json:"isPublished,omitempty"`
-	CategoryIDs           []uint             `json:"categoryIds,omitempty"`
+	CategoryIDs           []string           `json:"categoryIds,omitempty"`
 	AttributeValues       []AttributeValueReq `json:"attributeValues,omitempty"`
 	OptionValues          []OptionValueReq    `json:"optionValues,omitempty"`
 }
@@ -183,7 +183,7 @@ func parseProductTime(s *string) *time.Time {
 func (s *ProductService) scanProductListItem(row scannable) (*ProductListItem, error) {
 	var p ProductListItem
 	var oldPrice, specialPrice sql.NullFloat64
-	var brandID, thumbID sql.NullInt64
+	var brandID, thumbID sql.NullString
 	var brandName sql.NullString
 
 	err := row.Scan(
@@ -205,20 +205,18 @@ func (s *ProductService) scanProductListItem(row scannable) (*ProductListItem, e
 		p.SpecialPrice = &specialPrice.Float64
 	}
 	if brandID.Valid {
-		bid := uint(brandID.Int64)
-		p.BrandID = &bid
+		p.BrandID = &brandID.String
 	}
 	if brandName.Valid {
 		p.BrandName = brandName.String
 	}
 	if thumbID.Valid {
-		tid := uint(thumbID.Int64)
-		p.ThumbnailImageID = &tid
+		p.ThumbnailImageID = &thumbID.String
 	}
 	return &p, nil
 }
 
-func (s *ProductService) GetProducts(ctx context.Context, page, pageSize int, search string, categoryID, brandID *uint, minPrice, maxPrice *float64) ([]*ProductListItem, int64, error) {
+func (s *ProductService) GetProducts(ctx context.Context, page, pageSize int, search string, categoryID, brandID *string, minPrice, maxPrice *float64) ([]*ProductListItem, int64, error) {
 	if page < 1 {
 		page = 1
 	}
@@ -235,12 +233,12 @@ func (s *ProductService) GetProducts(ctx context.Context, page, pageSize int, se
 		args = append(args, search)
 		argIdx++
 	}
-	if categoryID != nil && *categoryID > 0 {
+	if categoryID != nil && *categoryID != "" {
 		where += " AND EXISTS (SELECT 1 FROM catalog_product_categories pc WHERE pc.product_id = p.id AND pc.category_id = $" + itoa(argIdx) + ")"
 		args = append(args, *categoryID)
 		argIdx++
 	}
-	if brandID != nil && *brandID > 0 {
+	if brandID != nil && *brandID != "" {
 		where += " AND p.brand_id = $" + itoa(argIdx)
 		args = append(args, *brandID)
 		argIdx++
@@ -328,7 +326,7 @@ func (s *ProductService) GetProductBySlug(ctx context.Context, slug string) (*Pr
 	var p ProductResponse
 	var oldPrice, specialPrice, ratingAvg sql.NullFloat64
 	var spStart, spEnd, pubOn sql.NullTime
-	var brandID, taxClassID, thumbID sql.NullInt64
+	var brandID, taxClassID, thumbID sql.NullString
 
 	err := row.Scan(
 		&p.ID, &p.Name, &p.Slug, &p.ShortDescription, &p.Description, &p.Specification,
@@ -367,16 +365,13 @@ func (s *ProductService) GetProductBySlug(ctx context.Context, slug string) (*Pr
 		p.PublishedOn = &pubOn.Time
 	}
 	if brandID.Valid {
-		bid := uint(brandID.Int64)
-		p.BrandID = &bid
+		p.BrandID = &brandID.String
 	}
 	if taxClassID.Valid {
-		tid := uint(taxClassID.Int64)
-		p.TaxClassID = &tid
+		p.TaxClassID = &taxClassID.String
 	}
 	if thumbID.Valid {
-		tid := uint(thumbID.Int64)
-		p.ThumbnailImageID = &tid
+		p.ThumbnailImageID = &thumbID.String
 	}
 
 	if err := s.loadProductRelations(ctx, &p); err != nil {
@@ -475,7 +470,7 @@ func (s *ProductService) loadProductRelations(ctx context.Context, p *ProductRes
 	return nil
 }
 
-func (s *ProductService) GetProductByID(ctx context.Context, id uint) (*ProductResponse, error) {
+func (s *ProductService) GetProductByID(ctx context.Context, id string) (*ProductResponse, error) {
 	row := s.db.QueryRowContext(ctx,
 		`SELECT p.id, p.name, p.slug, COALESCE(p.short_description, ''), COALESCE(p.description, ''), COALESCE(p.specification, ''),
 			p.price, p.old_price, p.special_price, p.special_price_start, p.special_price_end,
@@ -495,7 +490,7 @@ func (s *ProductService) GetProductByID(ctx context.Context, id uint) (*ProductR
 	var p ProductResponse
 	var oldPrice, specialPrice, ratingAvg sql.NullFloat64
 	var spStart, spEnd, pubOn sql.NullTime
-	var brandID, taxClassID, thumbID sql.NullInt64
+	var brandID, taxClassID, thumbID sql.NullString
 
 	err := row.Scan(
 		&p.ID, &p.Name, &p.Slug, &p.ShortDescription, &p.Description, &p.Specification,
@@ -534,16 +529,13 @@ func (s *ProductService) GetProductByID(ctx context.Context, id uint) (*ProductR
 		p.PublishedOn = &pubOn.Time
 	}
 	if brandID.Valid {
-		bid := uint(brandID.Int64)
-		p.BrandID = &bid
+		p.BrandID = &brandID.String
 	}
 	if taxClassID.Valid {
-		tid := uint(taxClassID.Int64)
-		p.TaxClassID = &tid
+		p.TaxClassID = &taxClassID.String
 	}
 	if thumbID.Valid {
-		tid := uint(thumbID.Int64)
-		p.ThumbnailImageID = &tid
+		p.ThumbnailImageID = &thumbID.String
 	}
 
 	if err := s.loadProductRelations(ctx, &p); err != nil {
@@ -610,7 +602,7 @@ func (s *ProductService) CreateProduct(ctx context.Context, req *CreateProductRe
 	}
 	defer tx.Rollback()
 
-	var productID uint
+	var productID string
 	var createdAt, updatedAt time.Time
 
 	var spStart, spEnd *time.Time
@@ -684,7 +676,7 @@ func (s *ProductService) CreateProduct(ctx context.Context, req *CreateProductRe
 	return s.GetProductByID(ctx, productID)
 }
 
-func (s *ProductService) UpdateProduct(ctx context.Context, id uint, req *UpdateProductRequest) (*ProductResponse, error) {
+func (s *ProductService) UpdateProduct(ctx context.Context, id string, req *UpdateProductRequest) (*ProductResponse, error) {
 	existing, err := s.GetProductByID(ctx, id)
 	if err != nil {
 		return nil, err
@@ -833,7 +825,7 @@ func (s *ProductService) UpdateProduct(ctx context.Context, id uint, req *Update
 	return s.GetProductByID(ctx, id)
 }
 
-func (s *ProductService) DeleteProduct(ctx context.Context, id uint) error {
+func (s *ProductService) DeleteProduct(ctx context.Context, id string) error {
 	result, err := s.db.ExecContext(ctx, "UPDATE catalog_products SET deleted_at = NOW() WHERE id = $1 AND deleted_at IS NULL", id)
 	if err != nil {
 		return err
@@ -845,6 +837,6 @@ func (s *ProductService) DeleteProduct(ctx context.Context, id uint) error {
 	return nil
 }
 
-func (s *ProductService) SearchProducts(ctx context.Context, query string, page, pageSize int, categoryID *uint, minPrice, maxPrice *float64) ([]*ProductListItem, int64, error) {
+func (s *ProductService) SearchProducts(ctx context.Context, query string, page, pageSize int, categoryID *string, minPrice, maxPrice *float64) ([]*ProductListItem, int64, error) {
 	return s.GetProducts(ctx, page, pageSize, query, categoryID, nil, minPrice, maxPrice)
 }

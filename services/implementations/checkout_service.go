@@ -15,7 +15,7 @@ func NewCheckoutService(db *sql.DB) *CheckoutService {
 }
 
 type CheckoutItemRequest struct {
-	ProductID      uint    `json:"productId"`
+	ProductID      string  `json:"productId"`
 	ProductName    string  `json:"productName"`
 	ProductSKU     string  `json:"productSku"`
 	ProductPrice   float64 `json:"productPrice"`
@@ -26,15 +26,15 @@ type CheckoutItemRequest struct {
 }
 
 type AddressRequest struct {
-	ContactName       string `json:"contactName"`
-	Phone             string `json:"phone"`
-	AddressLine1      string `json:"addressLine1"`
-	AddressLine2      string `json:"addressLine2"`
-	City              string `json:"city"`
-	ZipCode           string `json:"zipCode"`
-	DistrictID        *uint  `json:"districtId"`
-	StateOrProvinceID uint   `json:"stateOrProvinceId"`
-	CountryID         string `json:"countryId"`
+	ContactName       string  `json:"contactName"`
+	Phone             string  `json:"phone"`
+	AddressLine1      string  `json:"addressLine1"`
+	AddressLine2      string  `json:"addressLine2"`
+	City              string  `json:"city"`
+	ZipCode           string  `json:"zipCode"`
+	DistrictID        *string `json:"districtId"`
+	StateOrProvinceID string  `json:"stateOrProvinceId"`
+	CountryID         string  `json:"countryId"`
 }
 
 type CheckoutRequest struct {
@@ -52,12 +52,12 @@ type CheckoutRequest struct {
 }
 
 type CheckoutInfo struct {
-	CustomerID      uint     `json:"customerId"`
+	CustomerID      string   `json:"customerId"`
 	ShippingMethods []string `json:"shippingMethods"`
 	PaymentMethods  []string `json:"paymentMethods"`
 }
 
-func (s *CheckoutService) GetCheckout(ctx context.Context, customerID uint) (*CheckoutInfo, error) {
+func (s *CheckoutService) GetCheckout(ctx context.Context, customerID string) (*CheckoutInfo, error) {
 	return &CheckoutInfo{
 		CustomerID:      customerID,
 		ShippingMethods: []string{"Standard", "Express"},
@@ -65,7 +65,7 @@ func (s *CheckoutService) GetCheckout(ctx context.Context, customerID uint) (*Ch
 	}, nil
 }
 
-func (s *CheckoutService) ProcessCheckout(ctx context.Context, customerID uint, req CheckoutRequest) (*OrderResponse, error) {
+func (s *CheckoutService) ProcessCheckout(ctx context.Context, customerID string, req CheckoutRequest) (*OrderResponse, error) {
 	if len(req.Items) == 0 {
 		return nil, fmt.Errorf("checkout must have at least one item")
 	}
@@ -94,8 +94,8 @@ func (s *CheckoutService) ProcessCheckout(ctx context.Context, customerID uint, 
 
 	createReq := CreateOrderRequest{
 		Items:               orderItems,
-		ShippingAddressID:   0,
-		BillingAddressID:    0,
+		ShippingAddressID:   "",
+		BillingAddressID:    "",
 		CouponCode:          req.CouponCode,
 		DiscountAmount:      req.DiscountAmount,
 		SubTotal:            subTotal,

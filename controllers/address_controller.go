@@ -1,8 +1,6 @@
 package controllers
 
 import (
-	"strconv"
-
 	"github.com/gofiber/fiber/v3"
 	"simplcommerce/services/implementations"
 )
@@ -16,7 +14,7 @@ func NewAddressController(addressService *implementations.AddressService) *Addre
 }
 
 func (ctrl *AddressController) List(c fiber.Ctx) error {
-	userID, ok := c.Locals("userID").(uint)
+	userID, ok := c.Locals("userID").(string)
 	if !ok {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Unauthorized"})
 	}
@@ -30,7 +28,7 @@ func (ctrl *AddressController) List(c fiber.Ctx) error {
 }
 
 func (ctrl *AddressController) Create(c fiber.Ctx) error {
-	userID, ok := c.Locals("userID").(uint)
+	userID, ok := c.Locals("userID").(string)
 	if !ok {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Unauthorized"})
 	}
@@ -49,17 +47,17 @@ func (ctrl *AddressController) Create(c fiber.Ctx) error {
 }
 
 func (ctrl *AddressController) Update(c fiber.Ctx) error {
-	id, err := strconv.ParseUint(c.Params("id"), 10, 32)
-	if err != nil {
+	id := c.Params("id")
+	if id == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid address ID"})
 	}
 
-	userID, ok := c.Locals("userID").(uint)
+	userID, ok := c.Locals("userID").(string)
 	if !ok {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Unauthorized"})
 	}
 
-	isOwner, err := ctrl.addressService.IsOwner(c.Context(), uint(id), userID)
+	isOwner, err := ctrl.addressService.IsOwner(c.Context(), id, userID)
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Address not found"})
 	}
@@ -72,7 +70,7 @@ func (ctrl *AddressController) Update(c fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request body"})
 	}
 
-	address, err := ctrl.addressService.Update(c.Context(), uint(id), req)
+	address, err := ctrl.addressService.Update(c.Context(), id, req)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
@@ -81,17 +79,17 @@ func (ctrl *AddressController) Update(c fiber.Ctx) error {
 }
 
 func (ctrl *AddressController) Delete(c fiber.Ctx) error {
-	id, err := strconv.ParseUint(c.Params("id"), 10, 32)
-	if err != nil {
+	id := c.Params("id")
+	if id == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid address ID"})
 	}
 
-	userID, ok := c.Locals("userID").(uint)
+	userID, ok := c.Locals("userID").(string)
 	if !ok {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Unauthorized"})
 	}
 
-	isOwner, err := ctrl.addressService.IsOwner(c.Context(), uint(id), userID)
+	isOwner, err := ctrl.addressService.IsOwner(c.Context(), id, userID)
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Address not found"})
 	}
@@ -99,7 +97,7 @@ func (ctrl *AddressController) Delete(c fiber.Ctx) error {
 		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "Access denied"})
 	}
 
-	if err := ctrl.addressService.Delete(c.Context(), uint(id)); err != nil {
+	if err := ctrl.addressService.Delete(c.Context(), id); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 

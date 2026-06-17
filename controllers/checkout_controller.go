@@ -15,7 +15,7 @@ func NewCheckoutController(svc *initializers.Services) *CheckoutController {
 }
 
 func (h *CheckoutController) GetCheckout(c fiber.Ctx) error {
-	customerID := c.Locals("userID").(uint)
+	customerID := c.Locals("userID").(string)
 
 	info, err := h.svc.CheckoutService.GetCheckout(c.Context(), customerID)
 	if err != nil {
@@ -25,7 +25,7 @@ func (h *CheckoutController) GetCheckout(c fiber.Ctx) error {
 }
 
 func (h *CheckoutController) ProcessCheckout(c fiber.Ctx) error {
-	customerID := c.Locals("userID").(uint)
+	customerID := c.Locals("userID").(string)
 
 	var req implementations.CheckoutRequest
 	if err := c.Bind().Body(&req); err != nil {

@@ -27,9 +27,11 @@ func (h *ShipmentController) ListShipments(c fiber.Ctx) error {
 
 func (h *ShipmentController) GetShipment(c fiber.Ctx) error {
 	id := c.Params("id")
-	shipmentID := parseUint(id)
+	if id == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"success": false, "error": "invalid shipment id"})
+	}
 
-	shipment, err := h.svc.ShipmentService.GetShipment(c.Context(), shipmentID)
+	shipment, err := h.svc.ShipmentService.GetShipment(c.Context(), id)
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"success": false, "error": err.Error()})
 	}
@@ -42,7 +44,7 @@ func (h *ShipmentController) CreateShipment(c fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"success": false, "error": "invalid request body"})
 	}
 
-	createdByID := c.Locals("userID").(uint)
+	createdByID := c.Locals("userID").(string)
 
 	shipment, err := h.svc.ShipmentService.CreateShipment(c.Context(), req, createdByID)
 	if err != nil {

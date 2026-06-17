@@ -2,8 +2,8 @@ package entities
 
 type ProductLink struct {
 	BaseEntity
-	ProductID       uint `gorm:"not null"`
-	LinkedProductID uint `gorm:"not null"`
+	ProductID       string `gorm:"type:uuid;not null"`
+	LinkedProductID string `gorm:"type:uuid;not null"`
 	LinkType        int  `gorm:"default:2"`
 	Product         Product `gorm:"foreignKey:ProductID"`
 	LinkedProduct   Product `gorm:"foreignKey:LinkedProductID"`

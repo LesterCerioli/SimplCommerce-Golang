@@ -9,8 +9,8 @@ type ProductTemplate struct {
 func (ProductTemplate) TableName() string { return "catalog_product_templates" }
 
 type ProductTemplateProductAttribute struct {
-	ProductTemplateID  uint `gorm:"primaryKey"`
-	ProductAttributeID uint `gorm:"primaryKey"`
+	ProductTemplateID  string `gorm:"primaryKey;type:uuid"`
+	ProductAttributeID string `gorm:"primaryKey;type:uuid"`
 }
 
 func (ProductTemplateProductAttribute) TableName() string { return "catalog_product_template_product_attributes" }

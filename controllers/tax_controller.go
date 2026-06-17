@@ -40,7 +40,10 @@ func (h *TaxController) CreateTaxClass(c fiber.Ctx) error {
 }
 
 func (h *TaxController) UpdateTaxClass(c fiber.Ctx) error {
-	tcID := parseUint(c.Params("id"))
+	tcID := c.Params("id")
+	if tcID == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"success": false, "error": "invalid tax class id"})
+	}
 
 	var req struct {
 		Name string `json:"name"`
@@ -57,7 +60,11 @@ func (h *TaxController) UpdateTaxClass(c fiber.Ctx) error {
 }
 
 func (h *TaxController) DeleteTaxClass(c fiber.Ctx) error {
-	tcID := parseUint(c.Params("id"))
+	tcID := c.Params("id")
+	if tcID == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"success": false, "error": "invalid tax class id"})
+	}
+
 	if err := h.svc.TaxService.DeleteTaxClass(c.Context(), tcID); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"success": false, "error": err.Error()})
 	}
@@ -77,11 +84,11 @@ func (h *TaxController) ListTaxRates(c fiber.Ctx) error {
 
 func (h *TaxController) CreateTaxRate(c fiber.Ctx) error {
 	var req struct {
-		TaxClassID        uint   `json:"taxClassId"`
-		CountryID         string `json:"countryId"`
-		StateOrProvinceID *uint  `json:"stateOrProvinceId"`
+		TaxClassID        string  `json:"taxClassId"`
+		CountryID         string  `json:"countryId"`
+		StateOrProvinceID *string `json:"stateOrProvinceId"`
 		Rate              float64 `json:"rate"`
-		ZipCode           string `json:"zipCode"`
+		ZipCode           string  `json:"zipCode"`
 	}
 	if err := c.Bind().Body(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"success": false, "error": "invalid request body"})
@@ -95,14 +102,17 @@ func (h *TaxController) CreateTaxRate(c fiber.Ctx) error {
 }
 
 func (h *TaxController) UpdateTaxRate(c fiber.Ctx) error {
-	trID := parseUint(c.Params("id"))
+	trID := c.Params("id")
+	if trID == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"success": false, "error": "invalid tax rate id"})
+	}
 
 	var req struct {
-		TaxClassID        *uint   `json:"taxClassId"`
-		CountryID         *string `json:"countryId"`
-		StateOrProvinceID *uint   `json:"stateOrProvinceId"`
+		TaxClassID        *string  `json:"taxClassId"`
+		CountryID         *string  `json:"countryId"`
+		StateOrProvinceID *string  `json:"stateOrProvinceId"`
 		Rate              *float64 `json:"rate"`
-		ZipCode           *string `json:"zipCode"`
+		ZipCode           *string  `json:"zipCode"`
 	}
 	if err := c.Bind().Body(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"success": false, "error": "invalid request body"})
@@ -116,7 +126,10 @@ func (h *TaxController) UpdateTaxRate(c fiber.Ctx) error {
 }
 
 func (h *TaxController) DeleteTaxRate(c fiber.Ctx) error {
-	trID := parseUint(c.Params("id"))
+	trID := c.Params("id")
+	if trID == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"success": false, "error": "invalid tax rate id"})
+	}
 
 	if err := h.svc.TaxService.DeleteTaxRate(c.Context(), trID); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"success": false, "error": err.Error()})

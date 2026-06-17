@@ -2,11 +2,11 @@ package entities
 
 type Shipment struct {
 	BaseEntity
-	OrderID        uint   `gorm:"not null;index"`
-	TrackingNumber string `gorm:"size:450"`
-	WarehouseID    uint   `gorm:"not null"`
-	VendorID       *uint
-	CreatedByID    uint
+	OrderID        string  `gorm:"type:uuid;not null;index"`
+	TrackingNumber string  `gorm:"size:450"`
+	WarehouseID    string  `gorm:"type:uuid;not null"`
+	VendorID       *string `gorm:"type:uuid"`
+	CreatedByID    string  `gorm:"type:uuid"`
 	Items          []ShipmentItem `gorm:"foreignKey:ShipmentID"`
 }
 
@@ -14,9 +14,9 @@ func (Shipment) TableName() string { return "shipping_shipments" }
 
 type ShipmentItem struct {
 	BaseEntity
-	ShipmentID  uint     `gorm:"not null;index"`
-	OrderItemID uint     `gorm:"not null"`
-	ProductID   uint     `gorm:"not null"`
+	ShipmentID  string   `gorm:"type:uuid;not null;index"`
+	OrderItemID string   `gorm:"type:uuid;not null"`
+	ProductID   string   `gorm:"type:uuid;not null"`
 	Quantity    int      `gorm:"not null"`
 	Shipment    Shipment `gorm:"foreignKey:ShipmentID"`
 }

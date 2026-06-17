@@ -16,20 +16,20 @@ func NewNotificationService(db *sql.DB) *NotificationService {
 }
 
 type NotificationResponse struct {
-	ID         uint      `json:"id"`
-	UserID     uint      `json:"userId"`
+	ID         string    `json:"id"`
+	UserID     string    `json:"userId"`
 	Title      string    `json:"title"`
 	Body       string    `json:"body"`
 	IsRead     bool      `json:"isRead"`
-	EntityID   *uint     `json:"entityId,omitempty"`
+	EntityID   *string   `json:"entityId,omitempty"`
 	EntityType string    `json:"entityType"`
 	CreatedAt  time.Time `json:"createdAt"`
 	UpdatedAt  time.Time `json:"updatedAt"`
 }
 
-func (s *NotificationService) Create(ctx context.Context, userID uint, title, body, entityType string, entityID *uint) (*NotificationResponse, error) {
+func (s *NotificationService) Create(ctx context.Context, userID string, title, body, entityType string, entityID *string) (*NotificationResponse, error) {
 	var n NotificationResponse
-	var eID sql.NullInt64
+	var eID sql.NullString
 	err := s.db.QueryRowContext(ctx, `
 		INSERT INTO notifications_notifications (user_id, title, body, is_read, entity_id, entity_type, created_at, updated_at)
 		VALUES ($1,$2,$3,false,$4,$5,NOW(),NOW())
@@ -40,13 +40,12 @@ func (s *NotificationService) Create(ctx context.Context, userID uint, title, bo
 		return nil, fmt.Errorf("failed to create notification: %w", err)
 	}
 	if eID.Valid {
-		v := uint(eID.Int64)
-		n.EntityID = &v
+		n.EntityID = &eID.String
 	}
 	return &n, nil
 }
 
-func (s *NotificationService) GetUserNotifications(ctx context.Context, userID uint) ([]NotificationResponse, error) {
+func (s *NotificationService) GetUserNotifications(ctx context.Context, userID string) ([]NotificationResponse, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT id, user_id, title, body, is_read, entity_id, COALESCE(entity_type,''), created_at, updated_at
 		FROM notifications_notifications WHERE user_id = $1 ORDER BY created_at DESC
@@ -59,13 +58,12 @@ func (s *NotificationService) GetUserNotifications(ctx context.Context, userID u
 	var notifications []NotificationResponse
 	for rows.Next() {
 		var n NotificationResponse
-		var entityID sql.NullInt64
+		var entityID sql.NullString
 		if err := rows.Scan(&n.ID, &n.UserID, &n.Title, &n.Body, &n.IsRead, &entityID, &n.EntityType, &n.CreatedAt, &n.UpdatedAt); err != nil {
 			return nil, err
 		}
 		if entityID.Valid {
-			v := uint(entityID.Int64)
-			n.EntityID = &v
+			n.EntityID = &entityID.String
 		}
 		notifications = append(notifications, n)
 	}
@@ -75,7 +73,7 @@ func (s *NotificationService) GetUserNotifications(ctx context.Context, userID u
 	return notifications, nil
 }
 
-func (s *NotificationService) MarkAsRead(ctx context.Context, id, userID uint) error {
+func (s *NotificationService) MarkAsRead(ctx context.Context, id, userID string) error {
 	result, err := s.db.ExecContext(ctx, `
 		UPDATE notifications_notifications SET is_read = true, updated_at = NOW()
 		WHERE id = $1 AND user_id = $2
@@ -90,7 +88,7 @@ func (s *NotificationService) MarkAsRead(ctx context.Context, id, userID uint) e
 	return nil
 }
 
-func (s *NotificationService) GetUnreadCount(ctx context.Context, userID uint) (int64, error) {
+func (s *NotificationService) GetUnreadCount(ctx context.Context, userID string) (int64, error) {
 	var count int64
 	err := s.db.QueryRowContext(ctx, `
 		SELECT COUNT(*) FROM notifications_notifications WHERE user_id = $1 AND is_read = false

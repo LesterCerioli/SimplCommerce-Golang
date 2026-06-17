@@ -16,7 +16,7 @@ func NewCustomerGroupService(db *sql.DB) *CustomerGroupService {
 }
 
 type CustomerGroupResponse struct {
-	ID          uint      `json:"id"`
+	ID          string    `json:"id"`
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
 	IsActive    bool      `json:"isActive"`
@@ -63,7 +63,7 @@ func (s *CustomerGroupService) FindAll(ctx context.Context) ([]CustomerGroupResp
 	return groups, nil
 }
 
-func (s *CustomerGroupService) FindByID(ctx context.Context, id uint) (*CustomerGroupResponse, error) {
+func (s *CustomerGroupService) FindByID(ctx context.Context, id string) (*CustomerGroupResponse, error) {
 	var g CustomerGroupResponse
 	err := s.db.QueryRowContext(ctx, `
 		SELECT cg.id, cg.name, COALESCE(cg.description, ''), cg.is_active, cg.created_at, cg.updated_at,
@@ -96,7 +96,7 @@ func (s *CustomerGroupService) Create(ctx context.Context, req CreateCustomerGro
 	return &g, nil
 }
 
-func (s *CustomerGroupService) Update(ctx context.Context, id uint, req UpdateCustomerGroupRequest) (*CustomerGroupResponse, error) {
+func (s *CustomerGroupService) Update(ctx context.Context, id string, req UpdateCustomerGroupRequest) (*CustomerGroupResponse, error) {
 	isActive := true
 	if req.IsActive != nil {
 		isActive = *req.IsActive
@@ -113,7 +113,7 @@ func (s *CustomerGroupService) Update(ctx context.Context, id uint, req UpdateCu
 	return s.FindByID(ctx, id)
 }
 
-func (s *CustomerGroupService) Delete(ctx context.Context, id uint) error {
+func (s *CustomerGroupService) Delete(ctx context.Context, id string) error {
 	_, err := s.db.ExecContext(ctx, `DELETE FROM identity_customer_group_users WHERE customer_group_id = $1`, id)
 	if err != nil {
 		return fmt.Errorf("failed to remove group users: %w", err)

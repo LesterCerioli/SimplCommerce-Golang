@@ -30,40 +30,40 @@ func (CartRule) TableName() string { return "pricing_cart_rules" }
 
 type Coupon struct {
 	BaseEntity
-	CartRuleID uint   `gorm:"not null"`
-	Code       string `gorm:"uniqueIndex;size:100;not null"`
+	CartRuleID string   `gorm:"type:uuid;not null"`
+	Code       string   `gorm:"uniqueIndex;size:100;not null"`
 	CartRule   CartRule `gorm:"foreignKey:CartRuleID"`
 }
 
 func (Coupon) TableName() string { return "pricing_coupons" }
 
 type CartRuleCategory struct {
-	CartRuleID uint `gorm:"primaryKey"`
-	CategoryID uint `gorm:"primaryKey"`
+	CartRuleID string `gorm:"primaryKey;type:uuid"`
+	CategoryID string `gorm:"primaryKey;type:uuid"`
 }
 
 func (CartRuleCategory) TableName() string { return "pricing_cart_rule_categories" }
 
 type CartRuleProduct struct {
-	CartRuleID uint `gorm:"primaryKey"`
-	ProductID  uint `gorm:"primaryKey"`
+	CartRuleID string `gorm:"primaryKey;type:uuid"`
+	ProductID  string `gorm:"primaryKey;type:uuid"`
 }
 
 func (CartRuleProduct) TableName() string { return "pricing_cart_rule_products" }
 
 type CartRuleCustomerGroup struct {
-	CartRuleID      uint `gorm:"primaryKey"`
-	CustomerGroupID uint `gorm:"primaryKey"`
+	CartRuleID      string `gorm:"primaryKey;type:uuid"`
+	CustomerGroupID string `gorm:"primaryKey;type:uuid"`
 }
 
 func (CartRuleCustomerGroup) TableName() string { return "pricing_cart_rule_customer_groups" }
 
 type CartRuleUsage struct {
 	BaseEntity
-	CartRuleID uint   `gorm:"not null"`
-	CouponID   *uint
-	UserID     uint   `gorm:"not null"`
-	OrderID    uint   `gorm:"not null"`
+	CartRuleID string  `gorm:"type:uuid;not null"`
+	CouponID   *string `gorm:"type:uuid"`
+	UserID     string  `gorm:"type:uuid;not null"`
+	OrderID    string  `gorm:"type:uuid;not null"`
 	CartRule   CartRule `gorm:"foreignKey:CartRuleID"`
 	Coupon     *Coupon  `gorm:"foreignKey:CouponID"`
 }
@@ -87,8 +87,8 @@ type CatalogRule struct {
 func (CatalogRule) TableName() string { return "pricing_catalog_rules" }
 
 type CatalogRuleCustomerGroup struct {
-	CatalogRuleID   uint `gorm:"primaryKey"`
-	CustomerGroupID uint `gorm:"primaryKey"`
+	CatalogRuleID   string `gorm:"primaryKey;type:uuid"`
+	CustomerGroupID string `gorm:"primaryKey;type:uuid"`
 }
 
 func (CatalogRuleCustomerGroup) TableName() string { return "pricing_catalog_rule_customer_groups" }

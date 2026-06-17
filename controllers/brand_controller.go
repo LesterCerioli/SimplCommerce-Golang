@@ -1,8 +1,6 @@
 package controllers
 
 import (
-	"strconv"
-
 	"github.com/gofiber/fiber/v3"
 	"simplcommerce/internal/response"
 	"simplcommerce/services/implementations"
@@ -17,8 +15,8 @@ func NewBrandController(service *implementations.BrandService) *BrandController 
 }
 
 func (h *BrandController) Index(c fiber.Ctx) error {
-	page, _ := strconv.Atoi(c.Query("page", "1"))
-	pageSize, _ := strconv.Atoi(c.Query("pageSize", "20"))
+	page := parseInt(c.Query("page", "1"), 1)
+	pageSize := parseInt(c.Query("pageSize", "20"), 20)
 
 	brands, total, err := h.service.GetBrands(c.Context(), page, pageSize)
 	if err != nil {
@@ -54,8 +52,8 @@ func (h *BrandController) Create(c fiber.Ctx) error {
 }
 
 func (h *BrandController) Update(c fiber.Ctx) error {
-	id, err := strconv.ParseUint(c.Params("id"), 10, 32)
-	if err != nil {
+	id := c.Params("id")
+	if id == "" {
 		return response.Error(fiber.StatusBadRequest, "invalid brand id")
 	}
 
@@ -64,7 +62,7 @@ func (h *BrandController) Update(c fiber.Ctx) error {
 		return response.Error(fiber.StatusBadRequest, "invalid request body")
 	}
 
-	brand, err := h.service.UpdateBrand(c.Context(), uint(id), &req)
+	brand, err := h.service.UpdateBrand(c.Context(), id, &req)
 	if err != nil {
 		return response.Error(fiber.StatusInternalServerError, err.Error())
 	}
@@ -73,12 +71,12 @@ func (h *BrandController) Update(c fiber.Ctx) error {
 }
 
 func (h *BrandController) Delete(c fiber.Ctx) error {
-	id, err := strconv.ParseUint(c.Params("id"), 10, 32)
-	if err != nil {
+	id := c.Params("id")
+	if id == "" {
 		return response.Error(fiber.StatusBadRequest, "invalid brand id")
 	}
 
-	if err := h.service.DeleteBrand(c.Context(), uint(id)); err != nil {
+	if err := h.service.DeleteBrand(c.Context(), id); err != nil {
 		return response.Error(fiber.StatusInternalServerError, err.Error())
 	}
 

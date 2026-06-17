@@ -84,7 +84,7 @@ func (ctrl *AuthController) Refresh(c fiber.Ctx) error {
 }
 
 func (ctrl *AuthController) Me(c fiber.Ctx) error {
-	userID, ok := c.Locals("userID").(uint)
+	userID, ok := c.Locals("userID").(string)
 	if !ok {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Unauthorized"})
 	}

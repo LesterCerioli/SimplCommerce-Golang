@@ -10,9 +10,9 @@ type User struct {
 	IsDeleted                bool            `gorm:"default:false"`
 	Culture                  string          `gorm:"size:10"`
 	RefreshTokenHash         string          `gorm:"size:500"`
-	VendorID                 *uint
-	DefaultShippingAddressID *uint
-	DefaultBillingAddressID  *uint
+	VendorID                 *string `gorm:"type:uuid"`
+	DefaultShippingAddressID *string `gorm:"type:uuid"`
+	DefaultBillingAddressID  *string `gorm:"type:uuid"`
 
 	Roles          []Role          `gorm:"many2many:identity_user_roles;"`
 	CustomerGroups []CustomerGroup `gorm:"many2many:identity_customer_group_users;"`

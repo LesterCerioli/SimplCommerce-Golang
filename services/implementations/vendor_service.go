@@ -16,7 +16,7 @@ func NewVendorService(db *sql.DB) *VendorService {
 }
 
 type VendorResponse struct {
-	ID          uint      `json:"id"`
+	ID          string    `json:"id"`
 	Name        string    `json:"name"`
 	Slug        string    `json:"slug"`
 	Description string    `json:"description"`
@@ -66,7 +66,7 @@ func (s *VendorService) FindAll(ctx context.Context) ([]VendorResponse, error) {
 	return vendors, nil
 }
 
-func (s *VendorService) FindByID(ctx context.Context, id uint) (*VendorResponse, error) {
+func (s *VendorService) FindByID(ctx context.Context, id string) (*VendorResponse, error) {
 	var v VendorResponse
 	err := s.db.QueryRowContext(ctx, `
 		SELECT id, name, COALESCE(slug, ''), COALESCE(description, ''), COALESCE(email, ''), is_active, is_deleted, created_at, updated_at
@@ -96,7 +96,7 @@ func (s *VendorService) Create(ctx context.Context, req CreateVendorRequest) (*V
 	return &v, nil
 }
 
-func (s *VendorService) Update(ctx context.Context, id uint, req UpdateVendorRequest) (*VendorResponse, error) {
+func (s *VendorService) Update(ctx context.Context, id string, req UpdateVendorRequest) (*VendorResponse, error) {
 	isActive := true
 	if req.IsActive != nil {
 		isActive = *req.IsActive
@@ -113,7 +113,7 @@ func (s *VendorService) Update(ctx context.Context, id uint, req UpdateVendorReq
 	return s.FindByID(ctx, id)
 }
 
-func (s *VendorService) Delete(ctx context.Context, id uint) error {
+func (s *VendorService) Delete(ctx context.Context, id string) error {
 	result, err := s.db.ExecContext(ctx, `UPDATE identity_vendors SET is_deleted = true, updated_at = NOW() WHERE id = $1 AND is_deleted = false`, id)
 	if err != nil {
 		return fmt.Errorf("failed to delete vendor: %w", err)

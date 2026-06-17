@@ -16,16 +16,16 @@ func NewPaymentService(db *sql.DB) *PaymentService {
 }
 
 type PaymentResponse struct {
-	ID                 uint      `json:"id"`
-	OrderID            uint      `json:"orderId"`
-	Amount             float64   `json:"amount"`
-	PaymentFee         float64   `json:"paymentFee"`
-	PaymentMethod      string    `json:"paymentMethod"`
-	GatewayTransactionID string  `json:"gatewayTransactionId"`
-	Status             string    `json:"status"`
-	FailureMessage     string    `json:"failureMessage"`
-	CreatedAt          time.Time `json:"createdAt"`
-	UpdatedAt          time.Time `json:"updatedAt"`
+	ID                   string    `json:"id"`
+	OrderID              string    `json:"orderId"`
+	Amount               float64   `json:"amount"`
+	PaymentFee           float64   `json:"paymentFee"`
+	PaymentMethod        string    `json:"paymentMethod"`
+	GatewayTransactionID string    `json:"gatewayTransactionId"`
+	Status               string    `json:"status"`
+	FailureMessage       string    `json:"failureMessage"`
+	CreatedAt            time.Time `json:"createdAt"`
+	UpdatedAt            time.Time `json:"updatedAt"`
 }
 
 type PaymentProviderResponse struct {
@@ -51,7 +51,7 @@ func (s *PaymentService) CreatePayment(ctx context.Context, payment *PaymentResp
 	return nil
 }
 
-func (s *PaymentService) GetPayment(ctx context.Context, id uint) (*PaymentResponse, error) {
+func (s *PaymentService) GetPayment(ctx context.Context, id string) (*PaymentResponse, error) {
 	var p PaymentResponse
 	err := s.db.QueryRowContext(ctx, `
 		SELECT id, order_id, amount, payment_fee, payment_method, gateway_transaction_id, status, failure_message, created_at, updated_at
@@ -106,7 +106,7 @@ func (s *PaymentService) GetAllPayments(ctx context.Context, page, pageSize int)
 	return payments, total, nil
 }
 
-func (s *PaymentService) GetPaymentsByOrderID(ctx context.Context, orderID uint) ([]PaymentResponse, error) {
+func (s *PaymentService) GetPaymentsByOrderID(ctx context.Context, orderID string) ([]PaymentResponse, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT id, order_id, amount, payment_fee, payment_method, gateway_transaction_id, status, failure_message, created_at, updated_at
 		FROM payments_payments WHERE order_id = $1 ORDER BY created_at DESC

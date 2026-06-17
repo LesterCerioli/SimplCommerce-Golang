@@ -8,9 +8,9 @@ type Address struct {
 	AddressLine2      string `gorm:"size:450"`
 	City              string `gorm:"size:200"`
 	ZipCode           string `gorm:"size:20"`
-	DistrictID        *uint
-	StateOrProvinceID uint   `gorm:"not null"`
-	CountryID         string `gorm:"size:10"`
+	DistrictID        *string `gorm:"type:uuid"`
+	StateOrProvinceID string  `gorm:"type:uuid;not null"`
+	CountryID         string  `gorm:"size:10"`
 
 	StateOrProvince StateOrProvince `gorm:"foreignKey:StateOrProvinceID"`
 	Country         Country         `gorm:"foreignKey:CountryID"`

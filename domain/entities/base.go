@@ -7,15 +7,15 @@ import (
 )
 
 type BaseEntity struct {
-	ID        uint           `gorm:"primarykey" json:"id"`
+	ID        string         `gorm:"type:uuid;default:gen_random_uuid();primaryKey" json:"id"`
 	CreatedAt time.Time      `json:"createdAt"`
 	UpdatedAt time.Time      `json:"updatedAt"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
 type AuditableEntity struct {
-	CreatedByID uint  `gorm:"not null" json:"createdById"`
-	UpdatedByID *uint `json:"updatedById,omitempty"`
+	CreatedByID string  `gorm:"type:uuid;not null" json:"createdById"`
+	UpdatedByID *string `gorm:"type:uuid" json:"updatedById,omitempty"`
 }
 
 type SEOEntity struct {

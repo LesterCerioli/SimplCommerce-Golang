@@ -16,36 +16,36 @@ func NewPricingService(db *sql.DB) *PricingService {
 }
 
 type CartRuleResponse struct {
-	ID                   uint                      `json:"id"`
-	Name                 string                    `json:"name"`
-	Description          string                    `json:"description"`
-	IsActive             bool                      `json:"isActive"`
-	StartOn              *time.Time                `json:"startOn,omitempty"`
-	EndOn                *time.Time                `json:"endOn,omitempty"`
-	IsCouponRequired     bool                      `json:"isCouponRequired"`
-	RuleToApply          string                    `json:"ruleToApply"`
-	DiscountAmount       float64                   `json:"discountAmount"`
-	MaxDiscountAmount    *float64                  `json:"maxDiscountAmount,omitempty"`
-	DiscountStep         *int                      `json:"discountStep,omitempty"`
-	UsageLimitPerCoupon  *int                      `json:"usageLimitPerCoupon,omitempty"`
-	UsageLimitPerCustomer *int                     `json:"usageLimitPerCustomer,omitempty"`
-	CreatedAt            time.Time                 `json:"createdAt"`
-	UpdatedAt            time.Time                 `json:"updatedAt"`
-	Coupons              []CouponResponse          `json:"coupons,omitempty"`
-	Categories           []uint                    `json:"categories,omitempty"`
-	Products             []uint                    `json:"products,omitempty"`
-	CustomerGroups       []uint                    `json:"customerGroups,omitempty"`
+	ID                   string           `json:"id"`
+	Name                 string           `json:"name"`
+	Description          string           `json:"description"`
+	IsActive             bool             `json:"isActive"`
+	StartOn              *time.Time       `json:"startOn,omitempty"`
+	EndOn                *time.Time       `json:"endOn,omitempty"`
+	IsCouponRequired     bool             `json:"isCouponRequired"`
+	RuleToApply          string           `json:"ruleToApply"`
+	DiscountAmount       float64          `json:"discountAmount"`
+	MaxDiscountAmount    *float64         `json:"maxDiscountAmount,omitempty"`
+	DiscountStep         *int             `json:"discountStep,omitempty"`
+	UsageLimitPerCoupon  *int             `json:"usageLimitPerCoupon,omitempty"`
+	UsageLimitPerCustomer *int            `json:"usageLimitPerCustomer,omitempty"`
+	CreatedAt            time.Time        `json:"createdAt"`
+	UpdatedAt            time.Time        `json:"updatedAt"`
+	Coupons              []CouponResponse `json:"coupons,omitempty"`
+	Categories           []string         `json:"categories,omitempty"`
+	Products             []string         `json:"products,omitempty"`
+	CustomerGroups       []string         `json:"customerGroups,omitempty"`
 }
 
 type CouponResponse struct {
-	ID         uint      `json:"id"`
-	CartRuleID uint      `json:"cartRuleId"`
+	ID         string    `json:"id"`
+	CartRuleID string    `json:"cartRuleId"`
 	Code       string    `json:"code"`
 	CreatedAt  time.Time `json:"createdAt"`
 }
 
 type CatalogRuleResponse struct {
-	ID                uint       `json:"id"`
+	ID                string     `json:"id"`
 	Name              string     `json:"name"`
 	Description       string     `json:"description"`
 	IsActive          bool       `json:"isActive"`
@@ -56,7 +56,7 @@ type CatalogRuleResponse struct {
 	MaxDiscountAmount *float64   `json:"maxDiscountAmount,omitempty"`
 	CreatedAt         time.Time  `json:"createdAt"`
 	UpdatedAt         time.Time  `json:"updatedAt"`
-	CustomerGroups    []uint     `json:"customerGroups,omitempty"`
+	CustomerGroups    []string   `json:"customerGroups,omitempty"`
 }
 
 func (s *PricingService) GetCartRules(ctx context.Context) ([]CartRuleResponse, error) {
@@ -111,7 +111,7 @@ func (s *PricingService) GetCartRules(ctx context.Context) ([]CartRuleResponse, 
 	return rules, nil
 }
 
-func (s *PricingService) GetCartRule(ctx context.Context, id uint) (*CartRuleResponse, error) {
+func (s *PricingService) GetCartRule(ctx context.Context, id string) (*CartRuleResponse, error) {
 	var cr CartRuleResponse
 	var startOn, endOn sql.NullTime
 	var maxDiscount sql.NullFloat64
@@ -211,13 +211,13 @@ func (s *PricingService) CreateCartRule(ctx context.Context, req CreateCartRuleR
 		cr.UsageLimitPerCustomer = &v
 	}
 	cr.Coupons = []CouponResponse{}
-	cr.Categories = []uint{}
-	cr.Products = []uint{}
-	cr.CustomerGroups = []uint{}
+	cr.Categories = []string{}
+	cr.Products = []string{}
+	cr.CustomerGroups = []string{}
 	return &cr, nil
 }
 
-func (s *PricingService) UpdateCartRule(ctx context.Context, id uint, req CreateCartRuleRequest) (*CartRuleResponse, error) {
+func (s *PricingService) UpdateCartRule(ctx context.Context, id string, req CreateCartRuleRequest) (*CartRuleResponse, error) {
 	var cr CartRuleResponse
 	var startOn, endOn sql.NullTime
 	var maxDiscount sql.NullFloat64
@@ -266,7 +266,7 @@ func (s *PricingService) UpdateCartRule(ctx context.Context, id uint, req Create
 	return &cr, nil
 }
 
-func (s *PricingService) DeleteCartRule(ctx context.Context, id uint) error {
+func (s *PricingService) DeleteCartRule(ctx context.Context, id string) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return fmt.Errorf("failed to begin tx: %w", err)
@@ -434,11 +434,11 @@ func (s *PricingService) CreateCatalogRule(ctx context.Context, req CreateCatalo
 	if maxDiscount.Valid {
 		cr.MaxDiscountAmount = &maxDiscount.Float64
 	}
-	cr.CustomerGroups = []uint{}
+	cr.CustomerGroups = []string{}
 	return &cr, nil
 }
 
-func (s *PricingService) UpdateCatalogRule(ctx context.Context, id uint, req CreateCatalogRuleRequest) (*CatalogRuleResponse, error) {
+func (s *PricingService) UpdateCatalogRule(ctx context.Context, id string, req CreateCatalogRuleRequest) (*CatalogRuleResponse, error) {
 	var cr CatalogRuleResponse
 	var startOn, endOn sql.NullTime
 	var maxDiscount sql.NullFloat64
@@ -470,7 +470,7 @@ func (s *PricingService) UpdateCatalogRule(ctx context.Context, id uint, req Cre
 	return &cr, nil
 }
 
-func (s *PricingService) DeleteCatalogRule(ctx context.Context, id uint) error {
+func (s *PricingService) DeleteCatalogRule(ctx context.Context, id string) error {
 	result, err := s.db.ExecContext(ctx, `DELETE FROM pricing_catalog_rules WHERE id = $1`, id)
 	if err != nil {
 		return fmt.Errorf("failed to delete catalog rule: %w", err)
@@ -482,7 +482,7 @@ func (s *PricingService) DeleteCatalogRule(ctx context.Context, id uint) error {
 	return nil
 }
 
-func (s *PricingService) getCoupons(ctx context.Context, cartRuleID uint) ([]CouponResponse, error) {
+func (s *PricingService) getCoupons(ctx context.Context, cartRuleID string) ([]CouponResponse, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT id, cart_rule_id, code, created_at FROM pricing_coupons WHERE cart_rule_id = $1
 	`, cartRuleID)
@@ -505,7 +505,7 @@ func (s *PricingService) getCoupons(ctx context.Context, cartRuleID uint) ([]Cou
 	return coupons, nil
 }
 
-func (s *PricingService) getCartRuleCategories(ctx context.Context, cartRuleID uint) ([]uint, error) {
+func (s *PricingService) getCartRuleCategories(ctx context.Context, cartRuleID string) ([]string, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT category_id FROM pricing_cart_rule_categories WHERE cart_rule_id = $1
 	`, cartRuleID)
@@ -514,21 +514,21 @@ func (s *PricingService) getCartRuleCategories(ctx context.Context, cartRuleID u
 	}
 	defer rows.Close()
 
-	var ids []uint
+	var ids []string
 	for rows.Next() {
-		var id uint
+		var id string
 		if err := rows.Scan(&id); err != nil {
 			return nil, err
 		}
 		ids = append(ids, id)
 	}
 	if ids == nil {
-		ids = []uint{}
+		ids = []string{}
 	}
 	return ids, nil
 }
 
-func (s *PricingService) getCartRuleProducts(ctx context.Context, cartRuleID uint) ([]uint, error) {
+func (s *PricingService) getCartRuleProducts(ctx context.Context, cartRuleID string) ([]string, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT product_id FROM pricing_cart_rule_products WHERE cart_rule_id = $1
 	`, cartRuleID)
@@ -537,21 +537,21 @@ func (s *PricingService) getCartRuleProducts(ctx context.Context, cartRuleID uin
 	}
 	defer rows.Close()
 
-	var ids []uint
+	var ids []string
 	for rows.Next() {
-		var id uint
+		var id string
 		if err := rows.Scan(&id); err != nil {
 			return nil, err
 		}
 		ids = append(ids, id)
 	}
 	if ids == nil {
-		ids = []uint{}
+		ids = []string{}
 	}
 	return ids, nil
 }
 
-func (s *PricingService) getCartRuleCustomerGroups(ctx context.Context, cartRuleID uint) ([]uint, error) {
+func (s *PricingService) getCartRuleCustomerGroups(ctx context.Context, cartRuleID string) ([]string, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT customer_group_id FROM pricing_cart_rule_customer_groups WHERE cart_rule_id = $1
 	`, cartRuleID)
@@ -560,24 +560,24 @@ func (s *PricingService) getCartRuleCustomerGroups(ctx context.Context, cartRule
 	}
 	defer rows.Close()
 
-	var ids []uint
+	var ids []string
 	for rows.Next() {
-		var id uint
+		var id string
 		if err := rows.Scan(&id); err != nil {
 			return nil, err
 		}
 		ids = append(ids, id)
 	}
 	if ids == nil {
-		ids = []uint{}
+		ids = []string{}
 	}
 	return ids, nil
 }
 
 type CouponValidationResult struct {
-	Valid    bool           `json:"valid"`
+	Valid    bool             `json:"valid"`
 	CartRule *CartRuleResponse `json:"cartRule,omitempty"`
-	Error    string         `json:"error,omitempty"`
+	Error    string           `json:"error,omitempty"`
 }
 
 type CreateCartRuleRequest struct {

@@ -13,40 +13,40 @@ type CategoryService struct {
 }
 
 type CategoryResponse struct {
-	ID              uint               `json:"id"`
-	Name            string             `json:"name"`
-	Slug            string             `json:"slug"`
-	Description     string             `json:"description"`
-	DisplayOrder    int                `json:"displayOrder"`
-	IsPublished     bool               `json:"isPublished"`
-	IncludeInMenu   bool               `json:"includeInMenu"`
-	ParentID        *uint              `json:"parentId,omitempty"`
-	ThumbnailImageID *uint             `json:"thumbnailImageId,omitempty"`
-	CreatedAt       time.Time          `json:"createdAt"`
-	UpdatedAt       time.Time          `json:"updatedAt"`
-	Children        []*CategoryResponse `json:"children,omitempty"`
+	ID               string             `json:"id"`
+	Name             string             `json:"name"`
+	Slug             string             `json:"slug"`
+	Description      string             `json:"description"`
+	DisplayOrder     int                `json:"displayOrder"`
+	IsPublished      bool               `json:"isPublished"`
+	IncludeInMenu    bool               `json:"includeInMenu"`
+	ParentID         *string            `json:"parentId,omitempty"`
+	ThumbnailImageID *string            `json:"thumbnailImageId,omitempty"`
+	CreatedAt        time.Time          `json:"createdAt"`
+	UpdatedAt        time.Time          `json:"updatedAt"`
+	Children         []*CategoryResponse `json:"children,omitempty"`
 }
 
 type CreateCategoryRequest struct {
-	Name            string `json:"name"`
-	Slug            string `json:"slug,omitempty"`
-	Description     string `json:"description,omitempty"`
-	DisplayOrder    int    `json:"displayOrder,omitempty"`
-	IsPublished     bool   `json:"isPublished,omitempty"`
-	IncludeInMenu   bool   `json:"includeInMenu,omitempty"`
-	ParentID        *uint  `json:"parentId,omitempty"`
-	ThumbnailImageID *uint `json:"thumbnailImageId,omitempty"`
+	Name             string  `json:"name"`
+	Slug             string  `json:"slug,omitempty"`
+	Description      string  `json:"description,omitempty"`
+	DisplayOrder     int     `json:"displayOrder,omitempty"`
+	IsPublished      bool    `json:"isPublished,omitempty"`
+	IncludeInMenu    bool    `json:"includeInMenu,omitempty"`
+	ParentID         *string `json:"parentId,omitempty"`
+	ThumbnailImageID *string `json:"thumbnailImageId,omitempty"`
 }
 
 type UpdateCategoryRequest struct {
-	Name            string `json:"name"`
-	Slug            string `json:"slug,omitempty"`
-	Description     string `json:"description,omitempty"`
-	DisplayOrder    int    `json:"displayOrder,omitempty"`
-	IsPublished     bool   `json:"isPublished,omitempty"`
-	IncludeInMenu   bool   `json:"includeInMenu,omitempty"`
-	ParentID        *uint  `json:"parentId,omitempty"`
-	ThumbnailImageID *uint `json:"thumbnailImageId,omitempty"`
+	Name             string  `json:"name"`
+	Slug             string  `json:"slug,omitempty"`
+	Description      string  `json:"description,omitempty"`
+	DisplayOrder     int     `json:"displayOrder,omitempty"`
+	IsPublished      bool    `json:"isPublished,omitempty"`
+	IncludeInMenu    bool    `json:"includeInMenu,omitempty"`
+	ParentID         *string `json:"parentId,omitempty"`
+	ThumbnailImageID *string `json:"thumbnailImageId,omitempty"`
 }
 
 func NewCategoryService(db *sql.DB) *CategoryService {
@@ -55,20 +55,17 @@ func NewCategoryService(db *sql.DB) *CategoryService {
 
 func scanCategory(row scannable) (*CategoryResponse, error) {
 	var c CategoryResponse
-	var parentID sql.NullInt64
-	var thumbID sql.NullInt64
+	var parentID, thumbID sql.NullString
 
 	err := row.Scan(&c.ID, &c.Name, &c.Slug, &c.Description, &c.DisplayOrder, &c.IsPublished, &c.IncludeInMenu, &parentID, &thumbID, &c.CreatedAt, &c.UpdatedAt)
 	if err != nil {
 		return nil, err
 	}
 	if parentID.Valid {
-		pid := uint(parentID.Int64)
-		c.ParentID = &pid
+		c.ParentID = &parentID.String
 	}
 	if thumbID.Valid {
-		tid := uint(thumbID.Int64)
-		c.ThumbnailImageID = &tid
+		c.ThumbnailImageID = &thumbID.String
 	}
 	return &c, nil
 }
@@ -117,7 +114,7 @@ func (s *CategoryService) GetCategoryBySlug(ctx context.Context, slug string) (*
 	return c, nil
 }
 
-func (s *CategoryService) GetCategoryByID(ctx context.Context, id uint) (*CategoryResponse, error) {
+func (s *CategoryService) GetCategoryByID(ctx context.Context, id string) (*CategoryResponse, error) {
 	row := s.db.QueryRowContext(ctx,
 		`SELECT id, name, slug, description, display_order, is_published, include_in_menu, parent_id, thumbnail_image_id, created_at, updated_at
 		 FROM catalog_categories WHERE id = $1 AND is_deleted = false`,
@@ -152,7 +149,7 @@ func (s *CategoryService) CreateCategory(ctx context.Context, req *CreateCategor
 	return c, nil
 }
 
-func (s *CategoryService) UpdateCategory(ctx context.Context, id uint, req *UpdateCategoryRequest) (*CategoryResponse, error) {
+func (s *CategoryService) UpdateCategory(ctx context.Context, id string, req *UpdateCategoryRequest) (*CategoryResponse, error) {
 	existing, err := s.GetCategoryByID(ctx, id)
 	if err != nil {
 		return nil, err
@@ -191,7 +188,7 @@ func (s *CategoryService) UpdateCategory(ctx context.Context, id uint, req *Upda
 	return c, nil
 }
 
-func (s *CategoryService) DeleteCategory(ctx context.Context, id uint) error {
+func (s *CategoryService) DeleteCategory(ctx context.Context, id string) error {
 	var childCount int
 	err := s.db.QueryRowContext(ctx, "SELECT COUNT(*) FROM catalog_categories WHERE parent_id = $1 AND is_deleted = false", id).Scan(&childCount)
 	if err != nil {
@@ -213,7 +210,7 @@ func (s *CategoryService) DeleteCategory(ctx context.Context, id uint) error {
 }
 
 func BuildCategoryTree(categories []*CategoryResponse) []*CategoryResponse {
-	lookup := make(map[uint]*CategoryResponse)
+	lookup := make(map[string]*CategoryResponse)
 	for _, c := range categories {
 		c.Children = []*CategoryResponse{}
 		lookup[c.ID] = c

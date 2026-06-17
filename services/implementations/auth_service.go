@@ -14,8 +14,8 @@ import (
 )
 
 var (
-	ErrInvalidCredentials = errors.New("invalid email or password")
-	ErrEmailAlreadyExists = errors.New("email already exists")
+	ErrInvalidCredentials  = errors.New("invalid email or password")
+	ErrEmailAlreadyExists  = errors.New("email already exists")
 	ErrInvalidRefreshToken = errors.New("invalid refresh token")
 	ErrUserNotFound        = errors.New("user not found")
 )
@@ -30,18 +30,18 @@ type AuthResponse struct {
 	AccessToken  string `json:"accessToken"`
 	RefreshToken string `json:"refreshToken"`
 	ExpiresAt    int64  `json:"expiresAt"`
-	UserID       uint   `json:"userId"`
+	UserID       string `json:"userId"`
 }
 
 type UserResponse struct {
-	ID       uint     `json:"id"`
+	ID       string   `json:"id"`
 	Email    string   `json:"email"`
 	FullName string   `json:"fullName"`
 	Roles    []string `json:"roles"`
 }
 
 type jwtClaims struct {
-	UserID   uint     `json:"userId"`
+	UserID   string   `json:"userId"`
 	Email    string   `json:"email"`
 	FullName string   `json:"fullName"`
 	Roles    []string `json:"roles"`
@@ -77,13 +77,12 @@ func (s *AuthService) Register(ctx context.Context, req RegisterRequest) (*AuthR
 		return nil, fmt.Errorf("failed to hash password: %w", err)
 	}
 
-	userGuid := generateUUID()
-	var userID uint
+	var userID string
 	err = s.db.QueryRowContext(ctx, `
 		INSERT INTO identity_users (user_guid, full_name, email, password_hash, is_deleted, created_at, updated_at)
 		VALUES ($1, $2, $3, $4, false, NOW(), NOW())
 		RETURNING id
-	`, userGuid, req.FullName, req.Email, string(passwordHash)).Scan(&userID)
+	`, generateUUID(), req.FullName, req.Email, string(passwordHash)).Scan(&userID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create user: %w", err)
 	}
@@ -116,7 +115,7 @@ func (s *AuthService) Register(ctx context.Context, req RegisterRequest) (*AuthR
 }
 
 func (s *AuthService) Login(ctx context.Context, email, password string) (*AuthResponse, error) {
-	var userID uint
+	var userID string
 	var passwordHash string
 	err := s.db.QueryRowContext(ctx, `
 		SELECT id, password_hash FROM identity_users
@@ -143,10 +142,10 @@ func (s *AuthService) RefreshToken(ctx context.Context, refreshToken string) (*A
 	}
 	defer rows.Close()
 
-	var foundID uint
+	var foundID string
 	found := false
 	for rows.Next() {
-		var id uint
+		var id string
 		var hash sql.NullString
 		if err := rows.Scan(&id, &hash); err != nil {
 			continue
@@ -167,23 +166,23 @@ func (s *AuthService) RefreshToken(ctx context.Context, refreshToken string) (*A
 	return s.generateTokens(ctx, foundID)
 }
 
-func (s *AuthService) ValidateToken(tokenString string) (uint, string, []string, error) {
+func (s *AuthService) ValidateToken(tokenString string) (string, string, []string, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &jwtClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(s.jwtSecret), nil
 	})
 	if err != nil {
-		return 0, "", nil, fmt.Errorf("invalid token: %w", err)
+		return "", "", nil, fmt.Errorf("invalid token: %w", err)
 	}
 
 	claims, ok := token.Claims.(*jwtClaims)
 	if !ok || !token.Valid {
-		return 0, "", nil, errors.New("invalid token claims")
+		return "", "", nil, errors.New("invalid token claims")
 	}
 
 	return claims.UserID, claims.Email, claims.Roles, nil
 }
 
-func (s *AuthService) Me(ctx context.Context, userID uint) (*UserResponse, error) {
+func (s *AuthService) Me(ctx context.Context, userID string) (*UserResponse, error) {
 	user, _, err := s.findUserWithRoles(ctx, userID)
 	if err != nil {
 		return nil, err
@@ -191,7 +190,7 @@ func (s *AuthService) Me(ctx context.Context, userID uint) (*UserResponse, error
 	return user, nil
 }
 
-func (s *AuthService) generateTokens(ctx context.Context, userID uint) (*AuthResponse, error) {
+func (s *AuthService) generateTokens(ctx context.Context, userID string) (*AuthResponse, error) {
 	var email, fullName string
 	err := s.db.QueryRowContext(ctx, `
 		SELECT email, full_name FROM identity_users WHERE id = $1 AND is_deleted = false
@@ -257,7 +256,7 @@ func (s *AuthService) generateTokens(ctx context.Context, userID uint) (*AuthRes
 	}, nil
 }
 
-func (s *AuthService) findUserWithRoles(ctx context.Context, userID uint) (*UserResponse, []string, error) {
+func (s *AuthService) findUserWithRoles(ctx context.Context, userID string) (*UserResponse, []string, error) {
 	var user UserResponse
 	err := s.db.QueryRowContext(ctx, `
 		SELECT id, email, full_name FROM identity_users WHERE id = $1 AND is_deleted = false

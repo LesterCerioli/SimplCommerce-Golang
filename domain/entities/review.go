@@ -2,7 +2,7 @@ package entities
 
 type Review struct {
 	BaseEntity
-	UserID       uint   `gorm:"not null;index"`
+	UserID       string `gorm:"type:uuid;not null;index"`
 	Title        string `gorm:"size:450"`
 	Comment      string `gorm:"type:text"`
 	Rating       int    `gorm:"not null"`

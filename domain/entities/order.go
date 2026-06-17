@@ -2,20 +2,20 @@ package entities
 
 type Order struct {
 	BaseEntity
-	CustomerID           uint   `gorm:"not null;index"`
-	VendorID             *uint
-	CreatedByID          uint
-	UpdatedByID          *uint
+	CustomerID           string  `gorm:"type:uuid;not null;index"`
+	VendorID             *string `gorm:"type:uuid"`
+	CreatedByID          string  `gorm:"type:uuid"`
+	UpdatedByID          *string `gorm:"type:uuid"`
 	CouponCode           string  `gorm:"size:100"`
 	CouponRuleName       string  `gorm:"size:450"`
 	DiscountAmount       float64 `gorm:"default:0"`
 	SubTotal             float64 `gorm:"not null"`
 	SubTotalWithDiscount float64 `gorm:"not null"`
-	ShippingAddressID    uint    `gorm:"not null"`
-	BillingAddressID     uint    `gorm:"not null"`
+	ShippingAddressID    string  `gorm:"type:uuid;not null"`
+	BillingAddressID     string  `gorm:"type:uuid;not null"`
 	OrderStatus          string  `gorm:"size:50;default:'New'"`
 	OrderNote            string  `gorm:"size:1000"`
-	ParentID             *uint
+	ParentID             *string `gorm:"type:uuid"`
 	IsMasterOrder        bool    `gorm:"default:false"`
 	ShippingMethod       string  `gorm:"size:450"`
 	ShippingFeeAmount    float64 `gorm:"default:0"`

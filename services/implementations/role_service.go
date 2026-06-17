@@ -17,7 +17,7 @@ func NewRoleService(db *sql.DB) *RoleService {
 }
 
 type RoleResponse struct {
-	ID               uint      `json:"id"`
+	ID               string    `json:"id"`
 	Name             string    `json:"name"`
 	NormalizedName   string    `json:"normalizedName"`
 	ConcurrencyStamp string    `json:"concurrencyStamp"`
@@ -68,7 +68,7 @@ func (s *RoleService) FindAll(ctx context.Context) ([]RoleResponse, error) {
 	return roles, nil
 }
 
-func (s *RoleService) FindByID(ctx context.Context, id uint) (*RoleResponse, error) {
+func (s *RoleService) FindByID(ctx context.Context, id string) (*RoleResponse, error) {
 	var r RoleResponse
 	err := s.db.QueryRowContext(ctx, `
 		SELECT id, name, normalized_name, concurrency_stamp, created_at, updated_at
@@ -98,7 +98,7 @@ func (s *RoleService) FindByName(ctx context.Context, name string) (*RoleRespons
 	return &r, nil
 }
 
-func (s *RoleService) Delete(ctx context.Context, id uint) error {
+func (s *RoleService) Delete(ctx context.Context, id string) error {
 	_, err := s.db.ExecContext(ctx, `DELETE FROM identity_user_roles WHERE role_id = $1`, id)
 	if err != nil {
 		return fmt.Errorf("failed to remove role assignments: %w", err)
@@ -115,7 +115,7 @@ func (s *RoleService) Delete(ctx context.Context, id uint) error {
 	return nil
 }
 
-func (s *RoleService) AssignToUser(ctx context.Context, userID, roleID uint) error {
+func (s *RoleService) AssignToUser(ctx context.Context, userID, roleID string) error {
 	_, err := s.db.ExecContext(ctx, `
 		INSERT INTO identity_user_roles (user_id, role_id) VALUES ($1, $2) ON CONFLICT DO NOTHING
 	`, userID, roleID)
@@ -125,7 +125,7 @@ func (s *RoleService) AssignToUser(ctx context.Context, userID, roleID uint) err
 	return nil
 }
 
-func (s *RoleService) RemoveFromUser(ctx context.Context, userID, roleID uint) error {
+func (s *RoleService) RemoveFromUser(ctx context.Context, userID, roleID string) error {
 	_, err := s.db.ExecContext(ctx, `
 		DELETE FROM identity_user_roles WHERE user_id = $1 AND role_id = $2
 	`, userID, roleID)

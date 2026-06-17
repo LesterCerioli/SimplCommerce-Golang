@@ -29,10 +29,10 @@ type Product struct {
 	DisplayOrder           int                         `gorm:"default:0"`
 	ReviewsCount           int                         `gorm:"default:0"`
 	RatingAverage          *float64
-	VendorID               *uint
-	BrandID                *uint
-	TaxClassID             *uint
-	ThumbnailImageID       *uint
+	VendorID               *string `gorm:"type:uuid"`
+	BrandID                *string `gorm:"type:uuid"`
+	TaxClassID             *string `gorm:"type:uuid"`
+	ThumbnailImageID       *string `gorm:"type:uuid"`
 	IsPublished            bool                        `gorm:"default:false"`
 	PublishedOn            *time.Time
 

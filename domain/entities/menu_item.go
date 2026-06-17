@@ -2,9 +2,9 @@ package entities
 
 type MenuItem struct {
 	BaseEntity
-	ParentID     *uint
-	MenuID       uint   `gorm:"not null"`
-	EntityID     *uint  `gorm:"index"`
+	ParentID     *string `gorm:"type:uuid"`
+	MenuID       string  `gorm:"type:uuid;not null"`
+	EntityID     *string `gorm:"type:uuid;index"`
 	CustomLink   string `gorm:"size:450"`
 	Name         string `gorm:"size:450;not null"`
 	DisplayOrder int    `gorm:"default:0"`

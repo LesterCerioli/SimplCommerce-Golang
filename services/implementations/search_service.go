@@ -16,7 +16,7 @@ func NewSearchService(db *sql.DB) *SearchService {
 }
 
 type SearchQueryResponse struct {
-	ID           uint      `json:"id"`
+	ID           string    `json:"id"`
 	QueryText    string    `json:"queryText"`
 	ResultsCount int       `json:"resultsCount"`
 	CreatedAt    time.Time `json:"createdAt"`

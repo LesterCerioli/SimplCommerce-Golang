@@ -2,7 +2,7 @@ package entities
 
 type Payment struct {
 	BaseEntity
-	OrderID              uint    `gorm:"not null;index"`
+	OrderID              string  `gorm:"type:uuid;not null;index"`
 	Amount               float64 `gorm:"not null"`
 	PaymentFee           float64 `gorm:"default:0"`
 	PaymentMethod        string  `gorm:"size:450;not null"`

@@ -16,10 +16,10 @@ func NewWarehouseService(db *sql.DB) *WarehouseService {
 }
 
 type WarehouseResponse struct {
-	ID        uint      `json:"id"`
+	ID        string    `json:"id"`
 	Name      string    `json:"name"`
-	AddressID uint      `json:"addressId"`
-	VendorID  *uint     `json:"vendorId,omitempty"`
+	AddressID string    `json:"addressId"`
+	VendorID  *string   `json:"vendorId,omitempty"`
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 }
@@ -37,13 +37,12 @@ func (s *WarehouseService) List(ctx context.Context) ([]WarehouseResponse, error
 	var warehouses []WarehouseResponse
 	for rows.Next() {
 		var w WarehouseResponse
-		var vendorID sql.NullInt64
+		var vendorID sql.NullString
 		if err := rows.Scan(&w.ID, &w.Name, &w.AddressID, &vendorID, &w.CreatedAt, &w.UpdatedAt); err != nil {
 			return nil, err
 		}
 		if vendorID.Valid {
-			v := uint(vendorID.Int64)
-			w.VendorID = &v
+			w.VendorID = &vendorID.String
 		}
 		warehouses = append(warehouses, w)
 	}
@@ -53,9 +52,9 @@ func (s *WarehouseService) List(ctx context.Context) ([]WarehouseResponse, error
 	return warehouses, nil
 }
 
-func (s *WarehouseService) Create(ctx context.Context, name string, addressID uint) (*WarehouseResponse, error) {
+func (s *WarehouseService) Create(ctx context.Context, name string, addressID string) (*WarehouseResponse, error) {
 	var w WarehouseResponse
-	var vendorID sql.NullInt64
+	var vendorID sql.NullString
 	err := s.db.QueryRowContext(ctx, `
 		INSERT INTO inventory_warehouses (name, address_id, created_at, updated_at)
 		VALUES ($1,$2,NOW(),NOW()) RETURNING id, name, address_id, vendor_id, created_at, updated_at
@@ -64,15 +63,14 @@ func (s *WarehouseService) Create(ctx context.Context, name string, addressID ui
 		return nil, fmt.Errorf("failed to create warehouse: %w", err)
 	}
 	if vendorID.Valid {
-		v := uint(vendorID.Int64)
-		w.VendorID = &v
+		w.VendorID = &vendorID.String
 	}
 	return &w, nil
 }
 
-func (s *WarehouseService) Update(ctx context.Context, id uint, name string, addressID uint) (*WarehouseResponse, error) {
+func (s *WarehouseService) Update(ctx context.Context, id string, name string, addressID string) (*WarehouseResponse, error) {
 	var w WarehouseResponse
-	var vendorID sql.NullInt64
+	var vendorID sql.NullString
 	err := s.db.QueryRowContext(ctx, `
 		UPDATE inventory_warehouses SET name = $1, address_id = $2, updated_at = NOW()
 		WHERE id = $3 RETURNING id, name, address_id, vendor_id, created_at, updated_at
@@ -84,13 +82,12 @@ func (s *WarehouseService) Update(ctx context.Context, id uint, name string, add
 		return nil, fmt.Errorf("failed to update warehouse: %w", err)
 	}
 	if vendorID.Valid {
-		v := uint(vendorID.Int64)
-		w.VendorID = &v
+		w.VendorID = &vendorID.String
 	}
 	return &w, nil
 }
 
-func (s *WarehouseService) Delete(ctx context.Context, id uint) error {
+func (s *WarehouseService) Delete(ctx context.Context, id string) error {
 	result, err := s.db.ExecContext(ctx, `DELETE FROM inventory_warehouses WHERE id = $1`, id)
 	if err != nil {
 		return fmt.Errorf("failed to delete warehouse: %w", err)
@@ -102,9 +99,9 @@ func (s *WarehouseService) Delete(ctx context.Context, id uint) error {
 	return nil
 }
 
-func (s *WarehouseService) GetByID(ctx context.Context, id uint) (*WarehouseResponse, error) {
+func (s *WarehouseService) GetByID(ctx context.Context, id string) (*WarehouseResponse, error) {
 	var w WarehouseResponse
-	var vendorID sql.NullInt64
+	var vendorID sql.NullString
 	err := s.db.QueryRowContext(ctx, `
 		SELECT id, name, address_id, vendor_id, created_at, updated_at
 		FROM inventory_warehouses WHERE id = $1
@@ -116,8 +113,7 @@ func (s *WarehouseService) GetByID(ctx context.Context, id uint) (*WarehouseResp
 		return nil, fmt.Errorf("failed to get warehouse: %w", err)
 	}
 	if vendorID.Valid {
-		v := uint(vendorID.Int64)
-		w.VendorID = &v
+		w.VendorID = &vendorID.String
 	}
 	return &w, nil
 }

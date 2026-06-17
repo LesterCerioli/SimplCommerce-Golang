@@ -1,8 +1,6 @@
 package controllers
 
 import (
-	"strconv"
-
 	"github.com/gofiber/fiber/v3"
 	"simplcommerce/services/implementations"
 )
@@ -39,12 +37,12 @@ func (ctrl *CountryController) ListStates(c fiber.Ctx) error {
 }
 
 func (ctrl *CountryController) ListDistricts(c fiber.Ctx) error {
-	stateID, err := strconv.ParseUint(c.Params("id"), 10, 32)
-	if err != nil {
+	stateID := c.Params("id")
+	if stateID == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid state ID"})
 	}
 
-	districts, err := ctrl.countryService.FindDistrictsByStateID(c.Context(), uint(stateID))
+	districts, err := ctrl.countryService.FindDistrictsByStateID(c.Context(), stateID)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}

@@ -1,8 +1,6 @@
 package controllers
 
 import (
-	"strconv"
-
 	"github.com/gofiber/fiber/v3"
 	"simplcommerce/internal/response"
 	"simplcommerce/services/implementations"
@@ -27,34 +25,28 @@ func NewProductController(
 }
 
 func (h *ProductController) Index(c fiber.Ctx) error {
-	page, _ := strconv.Atoi(c.Query("page", "1"))
-	pageSize, _ := strconv.Atoi(c.Query("pageSize", "20"))
+	page := parseInt(c.Query("page", "1"), 1)
+	pageSize := parseInt(c.Query("pageSize", "20"), 20)
 	search := c.Query("search", "")
 
-	var categoryID *uint
+	var categoryID *string
 	if v := c.Query("categoryId"); v != "" {
-		if id, err := strconv.ParseUint(v, 10, 32); err == nil {
-			uid := uint(id)
-			categoryID = &uid
-		}
+		categoryID = &v
 	}
 
-	var brandID *uint
+	var brandID *string
 	if v := c.Query("brandId"); v != "" {
-		if id, err := strconv.ParseUint(v, 10, 32); err == nil {
-			uid := uint(id)
-			brandID = &uid
-		}
+		brandID = &v
 	}
 
 	var minPrice, maxPrice *float64
 	if v := c.Query("minPrice"); v != "" {
-		if p, err := strconv.ParseFloat(v, 64); err == nil {
+		if p, err := parseFloat(v); err == nil {
 			minPrice = &p
 		}
 	}
 	if v := c.Query("maxPrice"); v != "" {
-		if p, err := strconv.ParseFloat(v, 64); err == nil {
+		if p, err := parseFloat(v); err == nil {
 			maxPrice = &p
 		}
 	}
@@ -68,7 +60,7 @@ func (h *ProductController) Index(c fiber.Ctx) error {
 }
 
 func (h *ProductController) Featured(c fiber.Ctx) error {
-	count, _ := strconv.Atoi(c.Query("count", "10"))
+	count := parseInt(c.Query("count", "10"), 10)
 
 	products, err := h.productService.GetFeaturedProducts(c.Context(), count)
 	if err != nil {
@@ -104,8 +96,8 @@ func (h *ProductController) Create(c fiber.Ctx) error {
 }
 
 func (h *ProductController) Update(c fiber.Ctx) error {
-	id, err := strconv.ParseUint(c.Params("id"), 10, 32)
-	if err != nil {
+	id := c.Params("id")
+	if id == "" {
 		return response.Error(fiber.StatusBadRequest, "invalid product id")
 	}
 
@@ -114,7 +106,7 @@ func (h *ProductController) Update(c fiber.Ctx) error {
 		return response.Error(fiber.StatusBadRequest, "invalid request body")
 	}
 
-	product, err := h.productService.UpdateProduct(c.Context(), uint(id), &req)
+	product, err := h.productService.UpdateProduct(c.Context(), id, &req)
 	if err != nil {
 		return response.Error(fiber.StatusInternalServerError, err.Error())
 	}
@@ -123,12 +115,12 @@ func (h *ProductController) Update(c fiber.Ctx) error {
 }
 
 func (h *ProductController) Delete(c fiber.Ctx) error {
-	id, err := strconv.ParseUint(c.Params("id"), 10, 32)
-	if err != nil {
+	id := c.Params("id")
+	if id == "" {
 		return response.Error(fiber.StatusBadRequest, "invalid product id")
 	}
 
-	if err := h.productService.DeleteProduct(c.Context(), uint(id)); err != nil {
+	if err := h.productService.DeleteProduct(c.Context(), id); err != nil {
 		return response.Error(fiber.StatusInternalServerError, err.Error())
 	}
 
@@ -137,27 +129,24 @@ func (h *ProductController) Delete(c fiber.Ctx) error {
 
 func (h *ProductController) Search(c fiber.Ctx) error {
 	query := c.Query("q")
-	page, _ := strconv.Atoi(c.Query("page", "1"))
-	pageSize, _ := strconv.Atoi(c.Query("pageSize", "20"))
+	page := parseInt(c.Query("page", "1"), 1)
+	pageSize := parseInt(c.Query("pageSize", "20"), 20)
 
 	var minPrice, maxPrice *float64
 	if v := c.Query("minPrice"); v != "" {
-		if p, err := strconv.ParseFloat(v, 64); err == nil {
+		if p, err := parseFloat(v); err == nil {
 			minPrice = &p
 		}
 	}
 	if v := c.Query("maxPrice"); v != "" {
-		if p, err := strconv.ParseFloat(v, 64); err == nil {
+		if p, err := parseFloat(v); err == nil {
 			maxPrice = &p
 		}
 	}
 
-	var categoryID *uint
+	var categoryID *string
 	if v := c.Query("categoryId"); v != "" {
-		if id, err := strconv.ParseUint(v, 10, 32); err == nil {
-			uid := uint(id)
-			categoryID = &uid
-		}
+		categoryID = &v
 	}
 
 	products, total, err := h.productService.SearchProducts(c.Context(), query, page, pageSize, categoryID, minPrice, maxPrice)

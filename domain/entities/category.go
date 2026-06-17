@@ -9,8 +9,8 @@ type Category struct {
 	IsPublished      bool       `gorm:"default:false"`
 	IncludeInMenu    bool       `gorm:"default:true"`
 	IsDeleted        bool       `gorm:"default:false"`
-	ParentID         *uint
-	ThumbnailImageID *uint
+	ParentID         *string `gorm:"type:uuid"`
+	ThumbnailImageID *string `gorm:"type:uuid"`
 	Parent           *Category `gorm:"foreignKey:ParentID"`
 	Children         []Category `gorm:"foreignKey:ParentID"`
 	Products         []Product `gorm:"many2many:catalog_product_categories;"`

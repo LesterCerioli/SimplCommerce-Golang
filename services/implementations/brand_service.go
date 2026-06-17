@@ -13,13 +13,13 @@ type BrandService struct {
 }
 
 type BrandResponse struct {
-	ID          uint       `json:"id"`
-	Name        string     `json:"name"`
-	Slug        string     `json:"slug"`
-	Description string     `json:"description"`
-	IsPublished bool       `json:"isPublished"`
-	CreatedAt   time.Time  `json:"createdAt"`
-	UpdatedAt   time.Time  `json:"updatedAt"`
+	ID          string    `json:"id"`
+	Name        string    `json:"name"`
+	Slug        string    `json:"slug"`
+	Description string    `json:"description"`
+	IsPublished bool      `json:"isPublished"`
+	CreatedAt   time.Time `json:"createdAt"`
+	UpdatedAt   time.Time `json:"updatedAt"`
 }
 
 type CreateBrandRequest struct {
@@ -93,7 +93,7 @@ func (s *BrandService) GetBrandBySlug(ctx context.Context, slug string) (*BrandR
 	return &b, nil
 }
 
-func (s *BrandService) GetBrandByID(ctx context.Context, id uint) (*BrandResponse, error) {
+func (s *BrandService) GetBrandByID(ctx context.Context, id string) (*BrandResponse, error) {
 	var b BrandResponse
 	err := s.db.QueryRowContext(ctx,
 		"SELECT id, name, slug, description, is_published, created_at, updated_at FROM catalog_brands WHERE id = $1 AND is_deleted = false",
@@ -127,7 +127,7 @@ func (s *BrandService) CreateBrand(ctx context.Context, req *CreateBrandRequest)
 	return &b, nil
 }
 
-func (s *BrandService) UpdateBrand(ctx context.Context, id uint, req *UpdateBrandRequest) (*BrandResponse, error) {
+func (s *BrandService) UpdateBrand(ctx context.Context, id string, req *UpdateBrandRequest) (*BrandResponse, error) {
 	existing, err := s.GetBrandByID(ctx, id)
 	if err != nil {
 		return nil, err
@@ -162,7 +162,7 @@ func (s *BrandService) UpdateBrand(ctx context.Context, id uint, req *UpdateBran
 	return &b, nil
 }
 
-func (s *BrandService) DeleteBrand(ctx context.Context, id uint) error {
+func (s *BrandService) DeleteBrand(ctx context.Context, id string) error {
 	result, err := s.db.ExecContext(ctx, "UPDATE catalog_brands SET is_deleted = true, updated_at = NOW() WHERE id = $1 AND is_deleted = false", id)
 	if err != nil {
 		return err

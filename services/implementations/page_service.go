@@ -16,7 +16,7 @@ func NewPageService(db *sql.DB) *PageService {
 }
 
 type PageResponse struct {
-	ID          uint       `json:"id"`
+	ID          string     `json:"id"`
 	Name        string     `json:"name"`
 	Slug        string     `json:"slug"`
 	Body        string     `json:"body"`
@@ -73,7 +73,7 @@ func (s *PageService) GetBySlug(ctx context.Context, slug string) (*PageResponse
 	return &p, nil
 }
 
-func (s *PageService) GetByID(ctx context.Context, id uint) (*PageResponse, error) {
+func (s *PageService) GetByID(ctx context.Context, id string) (*PageResponse, error) {
 	var p PageResponse
 	var publishedOn sql.NullTime
 	err := s.db.QueryRowContext(ctx, `
@@ -118,7 +118,7 @@ func (s *PageService) Create(ctx context.Context, name, slug, body string, isPub
 	return &p, nil
 }
 
-func (s *PageService) Update(ctx context.Context, id uint, name, slug, body string, isPublished bool) (*PageResponse, error) {
+func (s *PageService) Update(ctx context.Context, id string, name, slug, body string, isPublished bool) (*PageResponse, error) {
 	existing, err := s.GetByID(ctx, id)
 	if err != nil {
 		return nil, err
@@ -158,7 +158,7 @@ func (s *PageService) Update(ctx context.Context, id uint, name, slug, body stri
 	return &p, nil
 }
 
-func (s *PageService) Delete(ctx context.Context, id uint) error {
+func (s *PageService) Delete(ctx context.Context, id string) error {
 	result, err := s.db.ExecContext(ctx, `DELETE FROM cms_pages WHERE id = $1`, id)
 	if err != nil {
 		return fmt.Errorf("failed to delete page: %w", err)

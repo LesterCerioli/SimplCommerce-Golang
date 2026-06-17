@@ -16,31 +16,31 @@ func NewReviewService(db *sql.DB) *ReviewService {
 }
 
 type ReviewResponse struct {
-	ID           uint               `json:"id"`
-	UserID       uint               `json:"userId"`
-	Title        string             `json:"title"`
-	Comment      string             `json:"comment"`
-	Rating       int                `json:"rating"`
-	ReviewerName string             `json:"reviewerName"`
-	Status       string             `json:"status"`
-	EntityTypeID string             `json:"entityTypeId"`
-	EntityID     uint               `json:"entityId"`
-	CreatedAt    time.Time          `json:"createdAt"`
-	UpdatedAt    time.Time          `json:"updatedAt"`
-	Replies      []ReplyResponse    `json:"replies,omitempty"`
+	ID           string          `json:"id"`
+	UserID       string          `json:"userId"`
+	Title        string          `json:"title"`
+	Comment      string          `json:"comment"`
+	Rating       int             `json:"rating"`
+	ReviewerName string          `json:"reviewerName"`
+	Status       string          `json:"status"`
+	EntityTypeID string          `json:"entityTypeId"`
+	EntityID     string          `json:"entityId"`
+	CreatedAt    time.Time       `json:"createdAt"`
+	UpdatedAt    time.Time       `json:"updatedAt"`
+	Replies      []ReplyResponse `json:"replies,omitempty"`
 }
 
 type ReplyResponse struct {
-	ID          uint      `json:"id"`
-	ReviewID    uint      `json:"reviewId"`
-	UserID      uint      `json:"userId"`
+	ID          string    `json:"id"`
+	ReviewID    string    `json:"reviewId"`
+	UserID      string    `json:"userId"`
 	Comment     string    `json:"comment"`
 	ReplierName string    `json:"replierName"`
 	Status      string    `json:"status"`
 	CreatedAt   time.Time `json:"createdAt"`
 }
 
-func (s *ReviewService) GetProductReviews(ctx context.Context, productID uint, page, pageSize int) ([]ReviewResponse, int64, error) {
+func (s *ReviewService) GetProductReviews(ctx context.Context, productID string, page, pageSize int) ([]ReviewResponse, int64, error) {
 	if page < 1 {
 		page = 1
 	}
@@ -83,7 +83,7 @@ func (s *ReviewService) GetProductReviews(ctx context.Context, productID uint, p
 	return reviews, total, nil
 }
 
-func (s *ReviewService) CreateReview(ctx context.Context, userID uint, title, comment string, rating int, reviewerName, entityTypeID string, entityID uint) (*ReviewResponse, error) {
+func (s *ReviewService) CreateReview(ctx context.Context, userID string, title, comment string, rating int, reviewerName, entityTypeID string, entityID string) (*ReviewResponse, error) {
 	var r ReviewResponse
 	err := s.db.QueryRowContext(ctx, `
 		INSERT INTO reviews_reviews (user_id, title, comment, rating, reviewer_name, status, entity_type_id, entity_id, created_at, updated_at)
@@ -98,7 +98,7 @@ func (s *ReviewService) CreateReview(ctx context.Context, userID uint, title, co
 	return &r, nil
 }
 
-func (s *ReviewService) UpdateStatus(ctx context.Context, id uint, status string) error {
+func (s *ReviewService) UpdateStatus(ctx context.Context, id string, status string) error {
 	result, err := s.db.ExecContext(ctx, `UPDATE reviews_reviews SET status = $1, updated_at = NOW() WHERE id = $2`, status, id)
 	if err != nil {
 		return fmt.Errorf("failed to update review status: %w", err)
@@ -110,7 +110,7 @@ func (s *ReviewService) UpdateStatus(ctx context.Context, id uint, status string
 	return nil
 }
 
-func (s *ReviewService) DeleteReview(ctx context.Context, id uint) error {
+func (s *ReviewService) DeleteReview(ctx context.Context, id string) error {
 	result, err := s.db.ExecContext(ctx, `DELETE FROM reviews_reviews WHERE id = $1`, id)
 	if err != nil {
 		return fmt.Errorf("failed to delete review: %w", err)
@@ -122,7 +122,7 @@ func (s *ReviewService) DeleteReview(ctx context.Context, id uint) error {
 	return nil
 }
 
-func (s *ReviewService) AddReply(ctx context.Context, reviewID, userID uint, comment, replierName string) (*ReplyResponse, error) {
+func (s *ReviewService) AddReply(ctx context.Context, reviewID, userID string, comment, replierName string) (*ReplyResponse, error) {
 	_, err := s.db.ExecContext(ctx, `SELECT 1 FROM reviews_reviews WHERE id = $1`, reviewID)
 	if err == sql.ErrNoRows {
 		return nil, fmt.Errorf("review not found")
@@ -144,7 +144,7 @@ func (s *ReviewService) AddReply(ctx context.Context, reviewID, userID uint, com
 	return &reply, nil
 }
 
-func (s *ReviewService) getReplies(ctx context.Context, reviewID uint) ([]ReplyResponse, error) {
+func (s *ReviewService) getReplies(ctx context.Context, reviewID string) ([]ReplyResponse, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT id, review_id, user_id, comment, replier_name, status, created_at
 		FROM reviews_replies WHERE review_id = $1 ORDER BY created_at ASC

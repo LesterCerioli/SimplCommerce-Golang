@@ -27,7 +27,7 @@ type CountryResponse struct {
 }
 
 type StateOrProvinceResponse struct {
-	ID        uint      `json:"id"`
+	ID        string    `json:"id"`
 	CountryID string    `json:"countryId"`
 	Code      string    `json:"code"`
 	Name      string    `json:"name"`
@@ -37,8 +37,8 @@ type StateOrProvinceResponse struct {
 }
 
 type DistrictResponse struct {
-	ID                uint      `json:"id"`
-	StateOrProvinceID uint      `json:"stateOrProvinceId"`
+	ID                string    `json:"id"`
+	StateOrProvinceID string    `json:"stateOrProvinceId"`
 	Name              string    `json:"name"`
 	Type              string    `json:"type"`
 	Location          string    `json:"location"`
@@ -109,7 +109,7 @@ func (s *CountryService) FindStatesByCountryID(ctx context.Context, countryID st
 	return states, nil
 }
 
-func (s *CountryService) FindStateByID(ctx context.Context, id uint) (*StateOrProvinceResponse, error) {
+func (s *CountryService) FindStateByID(ctx context.Context, id string) (*StateOrProvinceResponse, error) {
 	var state StateOrProvinceResponse
 	err := s.db.QueryRowContext(ctx, `
 		SELECT id, country_id, COALESCE(code, ''), name, COALESCE(type, ''), created_at, updated_at
@@ -124,7 +124,7 @@ func (s *CountryService) FindStateByID(ctx context.Context, id uint) (*StateOrPr
 	return &state, nil
 }
 
-func (s *CountryService) FindDistrictsByStateID(ctx context.Context, stateID uint) ([]DistrictResponse, error) {
+func (s *CountryService) FindDistrictsByStateID(ctx context.Context, stateID string) ([]DistrictResponse, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT id, state_or_province_id, name, COALESCE(type, ''), COALESCE(location, ''), created_at, updated_at
 		FROM identity_districts WHERE state_or_province_id = $1 ORDER BY name ASC
@@ -148,7 +148,7 @@ func (s *CountryService) FindDistrictsByStateID(ctx context.Context, stateID uin
 	return districts, nil
 }
 
-func (s *CountryService) FindDistrictByID(ctx context.Context, id uint) (*DistrictResponse, error) {
+func (s *CountryService) FindDistrictByID(ctx context.Context, id string) (*DistrictResponse, error) {
 	var d DistrictResponse
 	err := s.db.QueryRowContext(ctx, `
 		SELECT id, state_or_province_id, name, COALESCE(type, ''), COALESCE(location, ''), created_at, updated_at

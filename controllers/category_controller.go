@@ -1,8 +1,6 @@
 package controllers
 
 import (
-	"strconv"
-
 	"github.com/gofiber/fiber/v3"
 	"simplcommerce/internal/response"
 	"simplcommerce/services/implementations"
@@ -52,8 +50,8 @@ func (h *CategoryController) Create(c fiber.Ctx) error {
 }
 
 func (h *CategoryController) Update(c fiber.Ctx) error {
-	id, err := strconv.ParseUint(c.Params("id"), 10, 32)
-	if err != nil {
+	id := c.Params("id")
+	if id == "" {
 		return response.Error(fiber.StatusBadRequest, "invalid category id")
 	}
 
@@ -62,7 +60,7 @@ func (h *CategoryController) Update(c fiber.Ctx) error {
 		return response.Error(fiber.StatusBadRequest, "invalid request body")
 	}
 
-	category, err := h.service.UpdateCategory(c.Context(), uint(id), &req)
+	category, err := h.service.UpdateCategory(c.Context(), id, &req)
 	if err != nil {
 		return response.Error(fiber.StatusInternalServerError, err.Error())
 	}
@@ -71,12 +69,12 @@ func (h *CategoryController) Update(c fiber.Ctx) error {
 }
 
 func (h *CategoryController) Delete(c fiber.Ctx) error {
-	id, err := strconv.ParseUint(c.Params("id"), 10, 32)
-	if err != nil {
+	id := c.Params("id")
+	if id == "" {
 		return response.Error(fiber.StatusBadRequest, "invalid category id")
 	}
 
-	if err := h.service.DeleteCategory(c.Context(), uint(id)); err != nil {
+	if err := h.service.DeleteCategory(c.Context(), id); err != nil {
 		return response.Error(fiber.StatusInternalServerError, err.Error())
 	}
 

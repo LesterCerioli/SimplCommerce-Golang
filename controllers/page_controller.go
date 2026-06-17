@@ -56,7 +56,10 @@ func (h *PageController) CreatePage(c fiber.Ctx) error {
 }
 
 func (h *PageController) UpdatePage(c fiber.Ctx) error {
-	pageID := parseUint(c.Params("id"))
+	pageID := c.Params("id")
+	if pageID == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"success": false, "error": "invalid page id"})
+	}
 
 	var req struct {
 		Name        string `json:"name"`
@@ -76,7 +79,10 @@ func (h *PageController) UpdatePage(c fiber.Ctx) error {
 }
 
 func (h *PageController) DeletePage(c fiber.Ctx) error {
-	pageID := parseUint(c.Params("id"))
+	pageID := c.Params("id")
+	if pageID == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"success": false, "error": "invalid page id"})
+	}
 
 	if err := h.svc.PageService.Delete(c.Context(), pageID); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"success": false, "error": err.Error()})

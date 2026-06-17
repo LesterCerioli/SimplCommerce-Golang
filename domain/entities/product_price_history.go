@@ -6,8 +6,8 @@ import (
 
 type ProductPriceHistory struct {
 	BaseEntity
-	ProductID         uint
-	CreatedByID       uint
+	ProductID         string `gorm:"type:uuid"`
+	CreatedByID       string `gorm:"type:uuid"`
 	Price             *float64
 	OldPrice          *float64
 	SpecialPrice      *float64

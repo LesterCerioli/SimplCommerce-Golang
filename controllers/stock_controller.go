@@ -14,7 +14,10 @@ func NewStockController(svc *initializers.Services) *StockController {
 }
 
 func (h *StockController) GetStock(c fiber.Ctx) error {
-	productID := parseUint(c.Params("productId"))
+	productID := c.Params("productId")
+	if productID == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"success": false, "error": "invalid product id"})
+	}
 
 	stock, err := h.svc.StockService.GetStock(c.Context(), productID)
 	if err != nil {
@@ -24,11 +27,15 @@ func (h *StockController) GetStock(c fiber.Ctx) error {
 }
 
 func (h *StockController) UpdateStock(c fiber.Ctx) error {
-	productID := parseUint(c.Params("productId"))
-	createdByID := c.Locals("userID").(uint)
+	productID := c.Params("productId")
+	if productID == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"success": false, "error": "invalid product id"})
+	}
+
+	createdByID := c.Locals("userID").(string)
 
 	var req struct {
-		WarehouseID uint   `json:"warehouseId"`
+		WarehouseID string `json:"warehouseId"`
 		Quantity    int    `json:"quantity"`
 		Note        string `json:"note"`
 	}
@@ -44,7 +51,11 @@ func (h *StockController) UpdateStock(c fiber.Ctx) error {
 }
 
 func (h *StockController) GetStockHistory(c fiber.Ctx) error {
-	productID := parseUint(c.Params("productId"))
+	productID := c.Params("productId")
+	if productID == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"success": false, "error": "invalid product id"})
+	}
+
 	page := parseInt(c.Query("page", "1"), 1)
 	pageSize := parseInt(c.Query("pageSize", "20"), 20)
 

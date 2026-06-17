@@ -16,16 +16,16 @@ func NewCartService(db *sql.DB) *CartService {
 }
 
 type CartItemResponse struct {
-	ID         uint      `json:"id"`
-	ProductID  uint      `json:"productId"`
-	CustomerID uint      `json:"customerId"`
+	ID         string    `json:"id"`
+	ProductID  string    `json:"productId"`
+	CustomerID string    `json:"customerId"`
 	Quantity   int       `json:"quantity"`
-	VendorID   *uint     `json:"vendorId,omitempty"`
+	VendorID   *string   `json:"vendorId,omitempty"`
 	CreatedAt  time.Time `json:"createdAt"`
 	UpdatedAt  time.Time `json:"updatedAt"`
 }
 
-func (s *CartService) GetCart(ctx context.Context, customerID uint) ([]CartItemResponse, error) {
+func (s *CartService) GetCart(ctx context.Context, customerID string) ([]CartItemResponse, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT id, product_id, customer_id, quantity, vendor_id, created_at, updated_at
 		FROM cart_cart_items WHERE customer_id = $1
@@ -38,13 +38,12 @@ func (s *CartService) GetCart(ctx context.Context, customerID uint) ([]CartItemR
 	var items []CartItemResponse
 	for rows.Next() {
 		var item CartItemResponse
-		var vendorID sql.NullInt64
+		var vendorID sql.NullString
 		if err := rows.Scan(&item.ID, &item.ProductID, &item.CustomerID, &item.Quantity, &vendorID, &item.CreatedAt, &item.UpdatedAt); err != nil {
 			return nil, fmt.Errorf("failed to scan cart item: %w", err)
 		}
 		if vendorID.Valid {
-			v := uint(vendorID.Int64)
-			item.VendorID = &v
+			item.VendorID = &vendorID.String
 		}
 		items = append(items, item)
 	}
@@ -54,7 +53,7 @@ func (s *CartService) GetCart(ctx context.Context, customerID uint) ([]CartItemR
 	return items, nil
 }
 
-func (s *CartService) AddItem(ctx context.Context, customerID, productID uint, quantity int) error {
+func (s *CartService) AddItem(ctx context.Context, customerID, productID string, quantity int) error {
 	existing, err := s.findItemByCustomerAndProduct(ctx, customerID, productID)
 	if err == nil && existing != nil {
 		_, err = s.db.ExecContext(ctx, `
@@ -80,7 +79,7 @@ func (s *CartService) AddItem(ctx context.Context, customerID, productID uint, q
 	return nil
 }
 
-func (s *CartService) UpdateQuantity(ctx context.Context, customerID, itemID uint, quantity int) error {
+func (s *CartService) UpdateQuantity(ctx context.Context, customerID, itemID string, quantity int) error {
 	if quantity <= 0 {
 		return s.RemoveItem(ctx, customerID, itemID)
 	}
@@ -98,7 +97,7 @@ func (s *CartService) UpdateQuantity(ctx context.Context, customerID, itemID uin
 	return nil
 }
 
-func (s *CartService) RemoveItem(ctx context.Context, customerID, itemID uint) error {
+func (s *CartService) RemoveItem(ctx context.Context, customerID, itemID string) error {
 	result, err := s.db.ExecContext(ctx, `
 		DELETE FROM cart_cart_items WHERE id = $1 AND customer_id = $2
 	`, itemID, customerID)
@@ -112,7 +111,7 @@ func (s *CartService) RemoveItem(ctx context.Context, customerID, itemID uint) e
 	return nil
 }
 
-func (s *CartService) ClearCart(ctx context.Context, customerID uint) error {
+func (s *CartService) ClearCart(ctx context.Context, customerID string) error {
 	_, err := s.db.ExecContext(ctx, `DELETE FROM cart_cart_items WHERE customer_id = $1`, customerID)
 	if err != nil {
 		return fmt.Errorf("failed to clear cart: %w", err)
@@ -120,9 +119,9 @@ func (s *CartService) ClearCart(ctx context.Context, customerID uint) error {
 	return nil
 }
 
-func (s *CartService) findItemByCustomerAndProduct(ctx context.Context, customerID, productID uint) (*CartItemResponse, error) {
+func (s *CartService) findItemByCustomerAndProduct(ctx context.Context, customerID, productID string) (*CartItemResponse, error) {
 	var item CartItemResponse
-	var vendorID sql.NullInt64
+	var vendorID sql.NullString
 	err := s.db.QueryRowContext(ctx, `
 		SELECT id, product_id, customer_id, quantity, vendor_id, created_at, updated_at
 		FROM cart_cart_items WHERE customer_id = $1 AND product_id = $2
@@ -134,8 +133,7 @@ func (s *CartService) findItemByCustomerAndProduct(ctx context.Context, customer
 		return nil, err
 	}
 	if vendorID.Valid {
-		v := uint(vendorID.Int64)
-		item.VendorID = &v
+		item.VendorID = &vendorID.String
 	}
 	return &item, nil
 }

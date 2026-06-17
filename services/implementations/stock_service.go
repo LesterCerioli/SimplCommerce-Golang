@@ -16,23 +16,23 @@ func NewStockService(db *sql.DB) *StockService {
 }
 
 type StockResponse struct {
-	ProductID        uint    `json:"productId"`
-	TotalStock       int     `json:"totalStock"`
-	Available        int     `json:"available"`
-	ReservedQuantity int     `json:"reservedQuantity"`
+	ProductID        string `json:"productId"`
+	TotalStock       int    `json:"totalStock"`
+	Available        int    `json:"available"`
+	ReservedQuantity int    `json:"reservedQuantity"`
 }
 
 type StockHistoryResponse struct {
-	ID               uint      `json:"id"`
-	ProductID        uint      `json:"productId"`
-	WarehouseID      uint      `json:"warehouseId"`
-	CreatedByID      uint      `json:"createdById"`
+	ID               string    `json:"id"`
+	ProductID        string    `json:"productId"`
+	WarehouseID      string    `json:"warehouseId"`
+	CreatedByID      string    `json:"createdById"`
 	AdjustedQuantity int       `json:"adjustedQuantity"`
 	Note             string    `json:"note"`
 	CreatedAt        time.Time `json:"createdAt"`
 }
 
-func (s *StockService) GetStock(ctx context.Context, productID uint) (*StockResponse, error) {
+func (s *StockService) GetStock(ctx context.Context, productID string) (*StockResponse, error) {
 	var totalStock, reserved int
 	err := s.db.QueryRowContext(ctx, `
 		SELECT COALESCE(SUM(quantity),0), COALESCE(SUM(reserved_quantity),0)
@@ -50,8 +50,8 @@ func (s *StockService) GetStock(ctx context.Context, productID uint) (*StockResp
 	}, nil
 }
 
-func (s *StockService) UpdateStock(ctx context.Context, productID, warehouseID uint, quantity int, createdByID uint, note string) (*StockResponse, error) {
-	var existingID uint
+func (s *StockService) UpdateStock(ctx context.Context, productID, warehouseID string, quantity int, createdByID string, note string) (*StockResponse, error) {
+	var existingID string
 	var existingQty int
 	err := s.db.QueryRowContext(ctx, `
 		SELECT id, quantity FROM inventory_stocks WHERE product_id = $1 AND warehouse_id = $2
@@ -109,14 +109,14 @@ func (s *StockService) UpdateStock(ctx context.Context, productID, warehouseID u
 	return s.GetStock(ctx, productID)
 }
 
-func (s *StockService) AdjustStock(ctx context.Context, productID, warehouseID uint, adjustment int, createdByID uint, note string) (*StockResponse, error) {
+func (s *StockService) AdjustStock(ctx context.Context, productID, warehouseID string, adjustment int, createdByID string, note string) (*StockResponse, error) {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to begin tx: %w", err)
 	}
 	defer tx.Rollback()
 
-	var existingID uint
+	var existingID string
 	var existingQty int
 	err = tx.QueryRowContext(ctx, `
 		SELECT id, quantity FROM inventory_stocks WHERE product_id = $1 AND warehouse_id = $2
@@ -157,7 +157,7 @@ func (s *StockService) AdjustStock(ctx context.Context, productID, warehouseID u
 	return s.GetStock(ctx, productID)
 }
 
-func (s *StockService) GetStockHistory(ctx context.Context, productID uint, page, pageSize int) ([]StockHistoryResponse, int64, error) {
+func (s *StockService) GetStockHistory(ctx context.Context, productID string, page, pageSize int) ([]StockHistoryResponse, int64, error) {
 	if page < 1 {
 		page = 1
 	}

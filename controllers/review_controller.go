@@ -18,11 +18,10 @@ func (h *ReviewController) GetProductReviews(c fiber.Ctx) error {
 	if productIDStr == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"success": false, "error": "productId is required"})
 	}
-	productID := parseUint(productIDStr)
 	page := parseInt(c.Query("page", "1"), 1)
 	pageSize := parseInt(c.Query("pageSize", "20"), 20)
 
-	reviews, total, err := h.svc.ReviewService.GetProductReviews(c.Context(), productID, page, pageSize)
+	reviews, total, err := h.svc.ReviewService.GetProductReviews(c.Context(), productIDStr, page, pageSize)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"success": false, "error": err.Error()})
 	}
@@ -30,7 +29,7 @@ func (h *ReviewController) GetProductReviews(c fiber.Ctx) error {
 }
 
 func (h *ReviewController) CreateReview(c fiber.Ctx) error {
-	userID := c.Locals("userID").(uint)
+	userID := c.Locals("userID").(string)
 
 	var req struct {
 		Title        string `json:"title"`
@@ -38,7 +37,7 @@ func (h *ReviewController) CreateReview(c fiber.Ctx) error {
 		Rating       int    `json:"rating"`
 		ReviewerName string `json:"reviewerName"`
 		EntityTypeID string `json:"entityTypeId"`
-		EntityID     uint   `json:"entityId"`
+		EntityID     string `json:"entityId"`
 	}
 	if err := c.Bind().Body(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"success": false, "error": "invalid request body"})
@@ -52,7 +51,10 @@ func (h *ReviewController) CreateReview(c fiber.Ctx) error {
 }
 
 func (h *ReviewController) UpdateStatus(c fiber.Ctx) error {
-	reviewID := parseUint(c.Params("id"))
+	reviewID := c.Params("id")
+	if reviewID == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"success": false, "error": "invalid review id"})
+	}
 
 	var req struct {
 		Status string `json:"status"`
@@ -71,7 +73,10 @@ func (h *ReviewController) UpdateStatus(c fiber.Ctx) error {
 }
 
 func (h *ReviewController) DeleteReview(c fiber.Ctx) error {
-	reviewID := parseUint(c.Params("id"))
+	reviewID := c.Params("id")
+	if reviewID == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"success": false, "error": "invalid review id"})
+	}
 
 	if err := h.svc.ReviewService.DeleteReview(c.Context(), reviewID); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"success": false, "error": err.Error()})

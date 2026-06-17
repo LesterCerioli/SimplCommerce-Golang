@@ -1,8 +1,6 @@
 package controllers
 
 import (
-	"strconv"
-
 	"github.com/gofiber/fiber/v3"
 	"simplcommerce/services/implementations"
 )
@@ -45,12 +43,12 @@ func (ctrl *RoleController) Create(c fiber.Ctx) error {
 }
 
 func (ctrl *RoleController) Delete(c fiber.Ctx) error {
-	id, err := strconv.ParseUint(c.Params("id"), 10, 32)
-	if err != nil {
+	id := c.Params("id")
+	if id == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid role ID"})
 	}
 
-	if err := ctrl.roleService.Delete(c.Context(), uint(id)); err != nil {
+	if err := ctrl.roleService.Delete(c.Context(), id); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 

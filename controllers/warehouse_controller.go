@@ -24,7 +24,7 @@ func (h *WarehouseController) List(c fiber.Ctx) error {
 func (h *WarehouseController) Create(c fiber.Ctx) error {
 	var req struct {
 		Name      string `json:"name"`
-		AddressID uint   `json:"addressId"`
+		AddressID string `json:"addressId"`
 	}
 	if err := c.Bind().Body(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"success": false, "error": "invalid request body"})
@@ -41,11 +41,14 @@ func (h *WarehouseController) Create(c fiber.Ctx) error {
 }
 
 func (h *WarehouseController) Update(c fiber.Ctx) error {
-	warehouseID := parseUint(c.Params("id"))
+	warehouseID := c.Params("id")
+	if warehouseID == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"success": false, "error": "invalid warehouse id"})
+	}
 
 	var req struct {
 		Name      string `json:"name"`
-		AddressID uint   `json:"addressId"`
+		AddressID string `json:"addressId"`
 	}
 	if err := c.Bind().Body(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"success": false, "error": "invalid request body"})
@@ -59,7 +62,10 @@ func (h *WarehouseController) Update(c fiber.Ctx) error {
 }
 
 func (h *WarehouseController) Delete(c fiber.Ctx) error {
-	warehouseID := parseUint(c.Params("id"))
+	warehouseID := c.Params("id")
+	if warehouseID == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"success": false, "error": "invalid warehouse id"})
+	}
 
 	if err := h.svc.WarehouseService.Delete(c.Context(), warehouseID); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"success": false, "error": err.Error()})

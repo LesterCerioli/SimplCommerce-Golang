@@ -2,8 +2,8 @@ package entities
 
 type OrderItem struct {
 	BaseEntity
-	OrderID        uint    `gorm:"not null;index"`
-	ProductID      uint    `gorm:"not null"`
+	OrderID        string  `gorm:"type:uuid;not null;index"`
+	ProductID      string  `gorm:"type:uuid;not null"`
 	ProductName    string  `gorm:"size:450"`
 	ProductSKU     string  `gorm:"size:200"`
 	ProductPrice   float64 `gorm:"not null"`

@@ -10,7 +10,7 @@ func (TaxClass) TableName() string { return "tax_tax_classes" }
 
 type TaxRate struct {
 	BaseEntity
-	TaxClassID        uint     `gorm:"not null"`
+	TaxClassID        string   `gorm:"type:uuid;not null"`
 	CountryID         string   `gorm:"size:10;not null"`
 	StateOrProvinceID *uint
 	Rate              float64  `gorm:"not null"`

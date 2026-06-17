@@ -16,17 +16,17 @@ func NewActivityService(db *sql.DB) *ActivityService {
 }
 
 type ActivityResponse struct {
-	ID             uint      `json:"id"`
-	ActivityTypeID uint      `json:"activityTypeId"`
+	ID             string    `json:"id"`
+	ActivityTypeID string    `json:"activityTypeId"`
 	ActivityType   string    `json:"activityType"`
-	UserID         uint      `json:"userId"`
-	EntityID       uint      `json:"entityId"`
+	UserID         string    `json:"userId"`
+	EntityID       string    `json:"entityId"`
 	EntityTypeID   string    `json:"entityTypeId"`
 	CreatedAt      time.Time `json:"createdAt"`
 }
 
-func (s *ActivityService) LogActivity(ctx context.Context, activityTypeName string, userID, entityID uint, entityTypeID string) error {
-	var activityTypeID uint
+func (s *ActivityService) LogActivity(ctx context.Context, activityTypeName string, userID, entityID string, entityTypeID string) error {
+	var activityTypeID string
 	err := s.db.QueryRowContext(ctx, `SELECT id FROM activity_log_activity_types WHERE name = $1`, activityTypeName).Scan(&activityTypeID)
 	if err == sql.ErrNoRows {
 		err = s.db.QueryRowContext(ctx, `

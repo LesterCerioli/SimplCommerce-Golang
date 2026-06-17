@@ -18,16 +18,16 @@ func NewUserService(db *sql.DB) *UserService {
 }
 
 type UserListItem struct {
-	ID             uint       `json:"id"`
-	UserGuid       string     `json:"userGuid"`
-	FullName       string     `json:"fullName"`
-	Email          string     `json:"email"`
-	PhoneNumber    string     `json:"phoneNumber"`
-	Culture        string     `json:"culture"`
-	CreatedAt      time.Time  `json:"createdAt"`
-	UpdatedAt      time.Time  `json:"updatedAt"`
-	VendorID       *uint      `json:"vendorId"`
-	Roles          []string   `json:"roles"`
+	ID          string    `json:"id"`
+	UserGuid    string    `json:"userGuid"`
+	FullName    string    `json:"fullName"`
+	Email       string    `json:"email"`
+	PhoneNumber string    `json:"phoneNumber"`
+	Culture     string    `json:"culture"`
+	CreatedAt   time.Time `json:"createdAt"`
+	UpdatedAt   time.Time `json:"updatedAt"`
+	VendorID    *string   `json:"vendorId"`
+	Roles       []string  `json:"roles"`
 }
 
 type UpdateUserRequest struct {
@@ -38,7 +38,7 @@ type UpdateUserRequest struct {
 	Culture     string `json:"culture"`
 }
 
-func (s *UserService) FindByID(ctx context.Context, id uint) (*UserResponse, error) {
+func (s *UserService) FindByID(ctx context.Context, id string) (*UserResponse, error) {
 	user, _, err := s.findUserWithRolesByID(ctx, s.db, id)
 	return user, err
 }
@@ -91,14 +91,13 @@ func (s *UserService) FindAll(ctx context.Context) ([]UserListItem, error) {
 	var users []UserListItem
 	for rows.Next() {
 		var u UserListItem
-		var vendorID sql.NullInt64
+		var vendorID sql.NullString
 		err := rows.Scan(&u.ID, &u.UserGuid, &u.FullName, &u.Email, &u.PhoneNumber, &u.Culture, &u.CreatedAt, &u.UpdatedAt, &vendorID)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan user: %w", err)
 		}
 		if vendorID.Valid {
-			v := uint(vendorID.Int64)
-			u.VendorID = &v
+			u.VendorID = &vendorID.String
 		}
 		users = append(users, u)
 	}
@@ -136,14 +135,13 @@ func (s *UserService) Paginate(ctx context.Context, page, pageSize int) ([]UserL
 	var users []UserListItem
 	for rows.Next() {
 		var u UserListItem
-		var vendorID sql.NullInt64
+		var vendorID sql.NullString
 		err := rows.Scan(&u.ID, &u.UserGuid, &u.FullName, &u.Email, &u.PhoneNumber, &u.Culture, &u.CreatedAt, &u.UpdatedAt, &vendorID)
 		if err != nil {
 			return nil, 0, fmt.Errorf("failed to scan user: %w", err)
 		}
 		if vendorID.Valid {
-			v := uint(vendorID.Int64)
-			u.VendorID = &v
+			u.VendorID = &vendorID.String
 		}
 		users = append(users, u)
 	}
@@ -153,7 +151,7 @@ func (s *UserService) Paginate(ctx context.Context, page, pageSize int) ([]UserL
 	return users, total, nil
 }
 
-func (s *UserService) Update(ctx context.Context, id uint, req UpdateUserRequest) (*UserResponse, error) {
+func (s *UserService) Update(ctx context.Context, id string, req UpdateUserRequest) (*UserResponse, error) {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to begin transaction: %w", err)
@@ -189,7 +187,7 @@ func (s *UserService) Update(ctx context.Context, id uint, req UpdateUserRequest
 	return s.FindByID(ctx, id)
 }
 
-func (s *UserService) Delete(ctx context.Context, id uint) error {
+func (s *UserService) Delete(ctx context.Context, id string) error {
 	result, err := s.db.ExecContext(ctx, `UPDATE identity_users SET is_deleted = true, updated_at = NOW() WHERE id = $1 AND is_deleted = false`, id)
 	if err != nil {
 		return fmt.Errorf("failed to delete user: %w", err)
@@ -201,7 +199,7 @@ func (s *UserService) Delete(ctx context.Context, id uint) error {
 	return nil
 }
 
-func (s *UserService) findUserWithRolesByID(ctx context.Context, db *sql.DB, userID uint) (*UserResponse, []string, error) {
+func (s *UserService) findUserWithRolesByID(ctx context.Context, db *sql.DB, userID string) (*UserResponse, []string, error) {
 	var user UserResponse
 	err := db.QueryRowContext(ctx, `
 		SELECT id, email, full_name FROM identity_users WHERE id = $1 AND is_deleted = false

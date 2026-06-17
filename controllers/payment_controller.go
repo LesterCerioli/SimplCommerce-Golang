@@ -27,9 +27,11 @@ func (h *PaymentController) ListPayments(c fiber.Ctx) error {
 
 func (h *PaymentController) GetPayment(c fiber.Ctx) error {
 	id := c.Params("id")
-	paymentID := parseUint(id)
+	if id == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"success": false, "error": "invalid payment id"})
+	}
 
-	payment, err := h.svc.PaymentService.GetPayment(c.Context(), paymentID)
+	payment, err := h.svc.PaymentService.GetPayment(c.Context(), id)
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"success": false, "error": err.Error()})
 	}
@@ -38,7 +40,7 @@ func (h *PaymentController) GetPayment(c fiber.Ctx) error {
 
 func (h *PaymentController) CreatePayment(c fiber.Ctx) error {
 	var req struct {
-		OrderID              uint    `json:"orderId"`
+		OrderID              string  `json:"orderId"`
 		Amount               float64 `json:"amount"`
 		PaymentFee           float64 `json:"paymentFee"`
 		PaymentMethod        string  `json:"paymentMethod"`

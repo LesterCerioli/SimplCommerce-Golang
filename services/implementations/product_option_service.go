@@ -13,7 +13,7 @@ type ProductOptionService struct {
 }
 
 type ProductOptionResponse struct {
-	ID        uint      `json:"id"`
+	ID        string    `json:"id"`
 	Name      string    `json:"name"`
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
@@ -32,17 +32,17 @@ type ProductTemplateService struct {
 }
 
 type ProductTemplateResponse struct {
-	ID           uint                        `json:"id"`
-	Name         string                      `json:"name"`
-	CreatedAt    time.Time                   `json:"createdAt"`
-	UpdatedAt    time.Time                   `json:"updatedAt"`
-	AttributeIDs []uint                      `json:"attributeIds,omitempty"`
+	ID           string                     `json:"id"`
+	Name         string                     `json:"name"`
+	CreatedAt    time.Time                  `json:"createdAt"`
+	UpdatedAt    time.Time                  `json:"updatedAt"`
+	AttributeIDs []string                   `json:"attributeIds,omitempty"`
 	Attributes   []*ProductAttributeResponse `json:"attributes,omitempty"`
 }
 
 type CreateProductTemplateRequest struct {
-	Name         string `json:"name"`
-	AttributeIDs []uint `json:"attributeIds,omitempty"`
+	Name         string   `json:"name"`
+	AttributeIDs []string `json:"attributeIds,omitempty"`
 }
 
 func NewProductOptionService(db *sql.DB) *ProductOptionService {
@@ -105,7 +105,7 @@ func (s *ProductOptionService) CreateOption(ctx context.Context, req *CreateProd
 	return &o, nil
 }
 
-func (s *ProductOptionService) UpdateOption(ctx context.Context, id uint, req *UpdateProductOptionRequest) (*ProductOptionResponse, error) {
+func (s *ProductOptionService) UpdateOption(ctx context.Context, id string, req *UpdateProductOptionRequest) (*ProductOptionResponse, error) {
 	var o ProductOptionResponse
 	err := s.db.QueryRowContext(ctx,
 		`UPDATE catalog_product_options SET name = $1, updated_at = NOW()
@@ -122,7 +122,7 @@ func (s *ProductOptionService) UpdateOption(ctx context.Context, id uint, req *U
 	return &o, nil
 }
 
-func (s *ProductOptionService) DeleteOption(ctx context.Context, id uint) error {
+func (s *ProductOptionService) DeleteOption(ctx context.Context, id string) error {
 	result, err := s.db.ExecContext(ctx, "DELETE FROM catalog_product_options WHERE id = $1", id)
 	if err != nil {
 		return err

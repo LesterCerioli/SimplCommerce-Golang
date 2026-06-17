@@ -13,9 +13,9 @@ type ProductAttributeService struct {
 }
 
 type ProductAttributeResponse struct {
-	ID        uint      `json:"id"`
+	ID        string    `json:"id"`
 	Name      string    `json:"name"`
-	GroupID   uint      `json:"groupId"`
+	GroupID   string    `json:"groupId"`
 	GroupName string    `json:"groupName,omitempty"`
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
@@ -23,7 +23,7 @@ type ProductAttributeResponse struct {
 
 type CreateProductAttributeRequest struct {
 	Name    string `json:"name"`
-	GroupID uint   `json:"groupId"`
+	GroupID string `json:"groupId"`
 }
 
 type ProductAttributeGroupService struct {
@@ -31,7 +31,7 @@ type ProductAttributeGroupService struct {
 }
 
 type ProductAttributeGroupResponse struct {
-	ID         uint                       `json:"id"`
+	ID         string                     `json:"id"`
 	Name       string                     `json:"name"`
 	CreatedAt  time.Time                  `json:"createdAt"`
 	UpdatedAt  time.Time                  `json:"updatedAt"`
@@ -106,13 +106,13 @@ func (s *ProductAttributeService) CreateAttribute(ctx context.Context, req *Crea
 	if err != nil {
 		return nil, err
 	}
-	if a.GroupID > 0 {
+	if a.GroupID != "" {
 		_ = s.db.QueryRowContext(ctx, "SELECT name FROM catalog_product_attribute_groups WHERE id = $1", a.GroupID).Scan(&a.GroupName)
 	}
 	return &a, nil
 }
 
-func (s *ProductAttributeService) DeleteAttribute(ctx context.Context, id uint) error {
+func (s *ProductAttributeService) DeleteAttribute(ctx context.Context, id string) error {
 	result, err := s.db.ExecContext(ctx, "DELETE FROM catalog_product_attributes WHERE id = $1", id)
 	if err != nil {
 		return err
@@ -201,7 +201,7 @@ func (s *ProductAttributeGroupService) CreateGroup(ctx context.Context, req *Cre
 	return &g, nil
 }
 
-func (s *ProductAttributeGroupService) UpdateGroup(ctx context.Context, id uint, req *UpdateProductAttributeGroupRequest) (*ProductAttributeGroupResponse, error) {
+func (s *ProductAttributeGroupService) UpdateGroup(ctx context.Context, id string, req *UpdateProductAttributeGroupRequest) (*ProductAttributeGroupResponse, error) {
 	var g ProductAttributeGroupResponse
 	err := s.db.QueryRowContext(ctx,
 		`UPDATE catalog_product_attribute_groups SET name = $1, updated_at = NOW()

@@ -16,7 +16,7 @@ func NewMenuService(db *sql.DB) *MenuService {
 }
 
 type MenuResponse struct {
-	ID          uint               `json:"id"`
+	ID          string             `json:"id"`
 	Name        string             `json:"name"`
 	IsPublished bool               `json:"isPublished"`
 	IsSystem    bool               `json:"isSystem"`
@@ -26,10 +26,10 @@ type MenuResponse struct {
 }
 
 type MenuItemResponse struct {
-	ID           uint      `json:"id"`
-	ParentID     *uint     `json:"parentId,omitempty"`
-	MenuID       uint      `json:"menuId"`
-	EntityID     *uint     `json:"entityId,omitempty"`
+	ID           string    `json:"id"`
+	ParentID     *string   `json:"parentId,omitempty"`
+	MenuID       string    `json:"menuId"`
+	EntityID     *string   `json:"entityId,omitempty"`
 	CustomLink   string    `json:"customLink"`
 	Name         string    `json:"name"`
 	DisplayOrder int       `json:"displayOrder"`
@@ -61,7 +61,7 @@ func (s *MenuService) List(ctx context.Context) ([]MenuResponse, error) {
 	return menus, nil
 }
 
-func (s *MenuService) GetByID(ctx context.Context, id uint) (*MenuResponse, error) {
+func (s *MenuService) GetByID(ctx context.Context, id string) (*MenuResponse, error) {
 	var m MenuResponse
 	err := s.db.QueryRowContext(ctx, `
 		SELECT id, name, is_published, is_system, created_at, updated_at
@@ -85,17 +85,15 @@ func (s *MenuService) GetByID(ctx context.Context, id uint) (*MenuResponse, erro
 
 	for rows.Next() {
 		var item MenuItemResponse
-		var parentID, entityID sql.NullInt64
+		var parentID, entityID sql.NullString
 		if err := rows.Scan(&item.ID, &parentID, &item.MenuID, &entityID, &item.CustomLink, &item.Name, &item.DisplayOrder, &item.CreatedAt, &item.UpdatedAt); err != nil {
 			return nil, err
 		}
 		if parentID.Valid {
-			v := uint(parentID.Int64)
-			item.ParentID = &v
+			item.ParentID = &parentID.String
 		}
 		if entityID.Valid {
-			v := uint(entityID.Int64)
-			item.EntityID = &v
+			item.EntityID = &entityID.String
 		}
 		m.Items = append(m.Items, item)
 	}
@@ -118,7 +116,7 @@ func (s *MenuService) Create(ctx context.Context, name string, isPublished bool)
 	return &m, nil
 }
 
-func (s *MenuService) Update(ctx context.Context, id uint, name string, isPublished bool) (*MenuResponse, error) {
+func (s *MenuService) Update(ctx context.Context, id string, name string, isPublished bool) (*MenuResponse, error) {
 	_, err := s.db.ExecContext(ctx, `
 		UPDATE cms_menus SET name=$1, is_published=$2, updated_at=NOW() WHERE id=$3
 	`, name, isPublished, id)
@@ -128,7 +126,7 @@ func (s *MenuService) Update(ctx context.Context, id uint, name string, isPublis
 	return s.GetByID(ctx, id)
 }
 
-func (s *MenuService) Delete(ctx context.Context, id uint) error {
+func (s *MenuService) Delete(ctx context.Context, id string) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return fmt.Errorf("failed to begin tx: %w", err)
@@ -152,7 +150,7 @@ func (s *MenuService) Delete(ctx context.Context, id uint) error {
 	return tx.Commit()
 }
 
-func (s *MenuService) AddItem(ctx context.Context, menuID uint, parentID, entityID *uint, customLink, name string, displayOrder int) (*MenuItemResponse, error) {
+func (s *MenuService) AddItem(ctx context.Context, menuID string, parentID, entityID *string, customLink, name string, displayOrder int) (*MenuItemResponse, error) {
 	_, err := s.db.ExecContext(ctx, `SELECT 1 FROM cms_menus WHERE id = $1`, menuID)
 	if err == sql.ErrNoRows {
 		return nil, fmt.Errorf("menu not found")
@@ -162,7 +160,7 @@ func (s *MenuService) AddItem(ctx context.Context, menuID uint, parentID, entity
 	}
 
 	var item MenuItemResponse
-	var pID, eID sql.NullInt64
+	var pID, eID sql.NullString
 	err = s.db.QueryRowContext(ctx, `
 		INSERT INTO cms_menu_items (parent_id, menu_id, entity_id, custom_link, name, display_order, created_at, updated_at)
 		VALUES ($1,$2,$3,$4,$5,$6,NOW(),NOW())
@@ -173,19 +171,17 @@ func (s *MenuService) AddItem(ctx context.Context, menuID uint, parentID, entity
 		return nil, fmt.Errorf("failed to add menu item: %w", err)
 	}
 	if pID.Valid {
-		v := uint(pID.Int64)
-		item.ParentID = &v
+		item.ParentID = &pID.String
 	}
 	if eID.Valid {
-		v := uint(eID.Int64)
-		item.EntityID = &v
+		item.EntityID = &eID.String
 	}
 	return &item, nil
 }
 
-func (s *MenuService) UpdateItem(ctx context.Context, id uint, parentID, entityID *uint, customLink, name string, displayOrder int) (*MenuItemResponse, error) {
+func (s *MenuService) UpdateItem(ctx context.Context, id string, parentID, entityID *string, customLink, name string, displayOrder int) (*MenuItemResponse, error) {
 	var item MenuItemResponse
-	var pID, eID sql.NullInt64
+	var pID, eID sql.NullString
 	err := s.db.QueryRowContext(ctx, `
 		UPDATE cms_menu_items SET parent_id=$1, entity_id=$2, custom_link=$3, name=$4, display_order=$5, updated_at=NOW()
 		WHERE id=$6 RETURNING id, parent_id, menu_id, entity_id, custom_link, name, display_order, created_at, updated_at
@@ -198,17 +194,15 @@ func (s *MenuService) UpdateItem(ctx context.Context, id uint, parentID, entityI
 		return nil, fmt.Errorf("failed to update menu item: %w", err)
 	}
 	if pID.Valid {
-		v := uint(pID.Int64)
-		item.ParentID = &v
+		item.ParentID = &pID.String
 	}
 	if eID.Valid {
-		v := uint(eID.Int64)
-		item.EntityID = &v
+		item.EntityID = &eID.String
 	}
 	return &item, nil
 }
 
-func (s *MenuService) DeleteItem(ctx context.Context, id uint) error {
+func (s *MenuService) DeleteItem(ctx context.Context, id string) error {
 	result, err := s.db.ExecContext(ctx, `DELETE FROM cms_menu_items WHERE id = $1`, id)
 	if err != nil {
 		return fmt.Errorf("failed to delete menu item: %w", err)

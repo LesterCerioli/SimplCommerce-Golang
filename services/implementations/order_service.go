@@ -16,37 +16,37 @@ func NewOrderService(db *sql.DB) *OrderService {
 }
 
 type OrderResponse struct {
-	ID                 uint                `json:"id"`
-	CustomerID         uint                `json:"customerId"`
-	VendorID           *uint               `json:"vendorId,omitempty"`
-	CreatedByID        uint                `json:"createdById"`
-	UpdatedByID        *uint               `json:"updatedById,omitempty"`
-	CouponCode         string              `json:"couponCode"`
-	CouponRuleName     string              `json:"couponRuleName"`
-	DiscountAmount     float64             `json:"discountAmount"`
-	SubTotal           float64             `json:"subTotal"`
-	SubTotalWithDiscount float64           `json:"subTotalWithDiscount"`
-	ShippingAddressID  uint                `json:"shippingAddressId"`
-	BillingAddressID   uint                `json:"billingAddressId"`
-	OrderStatus        string              `json:"orderStatus"`
-	OrderNote          string              `json:"orderNote"`
-	ParentID           *uint               `json:"parentId,omitempty"`
-	IsMasterOrder      bool                `json:"isMasterOrder"`
-	ShippingMethod     string              `json:"shippingMethod"`
-	ShippingFeeAmount  float64             `json:"shippingFeeAmount"`
-	TaxAmount          float64             `json:"taxAmount"`
-	OrderTotal         float64             `json:"orderTotal"`
-	PaymentMethod      string              `json:"paymentMethod"`
-	PaymentFeeAmount   float64             `json:"paymentFeeAmount"`
-	CreatedAt          time.Time           `json:"createdAt"`
-	UpdatedAt          time.Time           `json:"updatedAt"`
-	Items              []OrderItemResponse `json:"items"`
+	ID                  string              `json:"id"`
+	CustomerID          string              `json:"customerId"`
+	VendorID            *string             `json:"vendorId,omitempty"`
+	CreatedByID         string              `json:"createdById"`
+	UpdatedByID         *string             `json:"updatedById,omitempty"`
+	CouponCode          string              `json:"couponCode"`
+	CouponRuleName      string              `json:"couponRuleName"`
+	DiscountAmount      float64             `json:"discountAmount"`
+	SubTotal            float64             `json:"subTotal"`
+	SubTotalWithDiscount float64            `json:"subTotalWithDiscount"`
+	ShippingAddressID   string              `json:"shippingAddressId"`
+	BillingAddressID    string              `json:"billingAddressId"`
+	OrderStatus         string              `json:"orderStatus"`
+	OrderNote           string              `json:"orderNote"`
+	ParentID            *string             `json:"parentId,omitempty"`
+	IsMasterOrder       bool                `json:"isMasterOrder"`
+	ShippingMethod      string              `json:"shippingMethod"`
+	ShippingFeeAmount   float64             `json:"shippingFeeAmount"`
+	TaxAmount           float64             `json:"taxAmount"`
+	OrderTotal          float64             `json:"orderTotal"`
+	PaymentMethod       string              `json:"paymentMethod"`
+	PaymentFeeAmount    float64             `json:"paymentFeeAmount"`
+	CreatedAt           time.Time           `json:"createdAt"`
+	UpdatedAt           time.Time           `json:"updatedAt"`
+	Items               []OrderItemResponse `json:"items"`
 }
 
 type OrderItemResponse struct {
-	ID             uint    `json:"id"`
-	OrderID        uint    `json:"orderId"`
-	ProductID      uint    `json:"productId"`
+	ID             string  `json:"id"`
+	OrderID        string  `json:"orderId"`
+	ProductID      string  `json:"productId"`
 	ProductName    string  `json:"productName"`
 	ProductSKU     string  `json:"productSku"`
 	ProductPrice   float64 `json:"productPrice"`
@@ -56,7 +56,7 @@ type OrderItemResponse struct {
 	TaxPercent     float64 `json:"taxPercent"`
 }
 
-func (s *OrderService) CreateOrder(ctx context.Context, customerID uint, req CreateOrderRequest) (*OrderResponse, error) {
+func (s *OrderService) CreateOrder(ctx context.Context, customerID string, req CreateOrderRequest) (*OrderResponse, error) {
 	orderTotal := req.SubTotalWithDiscount + req.ShippingFeeAmount + req.TaxAmount + req.PaymentFeeAmount
 	if orderTotal < 0 {
 		orderTotal = 0
@@ -68,7 +68,7 @@ func (s *OrderService) CreateOrder(ctx context.Context, customerID uint, req Cre
 	}
 	defer tx.Rollback()
 
-	var orderID uint
+	var orderID string
 	var createdAt, updatedAt time.Time
 	err = tx.QueryRowContext(ctx, `
 		INSERT INTO orders_orders (customer_id, created_by_id, coupon_code, coupon_rule_name, discount_amount,
@@ -110,8 +110,8 @@ func (s *OrderService) CreateOrder(ctx context.Context, customerID uint, req Cre
 	return s.GetOrderByID(ctx, orderID, customerID)
 }
 
-func (s *OrderService) GetOrderByID(ctx context.Context, id, customerID uint) (*OrderResponse, error) {
-	var vendorID, updatedByID, parentID sql.NullInt64
+func (s *OrderService) GetOrderByID(ctx context.Context, id, customerID string) (*OrderResponse, error) {
+	var vendorID, updatedByID, parentID sql.NullString
 	var o OrderResponse
 	err := s.db.QueryRowContext(ctx, `
 		SELECT id, customer_id, vendor_id, created_by_id, updated_by_id, coupon_code, coupon_rule_name,
@@ -132,20 +132,17 @@ func (s *OrderService) GetOrderByID(ctx context.Context, id, customerID uint) (*
 	if err != nil {
 		return nil, fmt.Errorf("failed to get order: %w", err)
 	}
-	if o.CustomerID != customerID && customerID != 0 {
+	if o.CustomerID != customerID && customerID != "" {
 		return nil, fmt.Errorf("order not found")
 	}
 	if vendorID.Valid {
-		v := uint(vendorID.Int64)
-		o.VendorID = &v
+		o.VendorID = &vendorID.String
 	}
 	if updatedByID.Valid {
-		v := uint(updatedByID.Int64)
-		o.UpdatedByID = &v
+		o.UpdatedByID = &updatedByID.String
 	}
 	if parentID.Valid {
-		v := uint(parentID.Int64)
-		o.ParentID = &v
+		o.ParentID = &parentID.String
 	}
 
 	items, err := s.getOrderItems(ctx, id)
@@ -156,7 +153,7 @@ func (s *OrderService) GetOrderByID(ctx context.Context, id, customerID uint) (*
 	return &o, nil
 }
 
-func (s *OrderService) GetCustomerOrders(ctx context.Context, customerID uint, page, pageSize int) ([]OrderResponse, int64, error) {
+func (s *OrderService) GetCustomerOrders(ctx context.Context, customerID string, page, pageSize int) ([]OrderResponse, int64, error) {
 	if page < 1 {
 		page = 1
 	}
@@ -181,7 +178,7 @@ func (s *OrderService) GetCustomerOrders(ctx context.Context, customerID uint, p
 
 	var orders []OrderResponse
 	for rows.Next() {
-		var id uint
+		var id string
 		if err := rows.Scan(&id); err != nil {
 			return nil, 0, err
 		}
@@ -222,11 +219,11 @@ func (s *OrderService) GetAllOrders(ctx context.Context, page, pageSize int) ([]
 
 	var orders []OrderResponse
 	for rows.Next() {
-		var id uint
+		var id string
 		if err := rows.Scan(&id); err != nil {
 			return nil, 0, err
 		}
-		o, err := s.GetOrderByID(ctx, id, 0)
+		o, err := s.GetOrderByID(ctx, id, "")
 		if err != nil {
 			return nil, 0, err
 		}
@@ -238,7 +235,7 @@ func (s *OrderService) GetAllOrders(ctx context.Context, page, pageSize int) ([]
 	return orders, total, nil
 }
 
-func (s *OrderService) UpdateStatus(ctx context.Context, id uint, status string, updatedByID uint) error {
+func (s *OrderService) UpdateStatus(ctx context.Context, id string, status string, updatedByID string) error {
 	var oldStatus string
 	err := s.db.QueryRowContext(ctx, `SELECT order_status FROM orders_orders WHERE id = $1`, id).Scan(&oldStatus)
 	if err == sql.ErrNoRows {
@@ -270,7 +267,7 @@ func (s *OrderService) UpdateStatus(ctx context.Context, id uint, status string,
 	return tx.Commit()
 }
 
-func (s *OrderService) getOrderItems(ctx context.Context, orderID uint) ([]OrderItemResponse, error) {
+func (s *OrderService) getOrderItems(ctx context.Context, orderID string) ([]OrderItemResponse, error) {
 	rows, err := s.db.QueryContext(ctx, `
 		SELECT id, order_id, product_id, product_name, product_sku, product_price,
 			quantity, discount_amount, tax_amount, tax_percent
@@ -297,24 +294,24 @@ func (s *OrderService) getOrderItems(ctx context.Context, orderID uint) ([]Order
 }
 
 type CreateOrderRequest struct {
-	Items              []CreateOrderItemRequest
-	ShippingAddressID  uint
-	BillingAddressID   uint
-	CouponCode         string
-	CouponRuleName     string
-	DiscountAmount     float64
-	SubTotal           float64
+	Items               []CreateOrderItemRequest
+	ShippingAddressID   string
+	BillingAddressID    string
+	CouponCode          string
+	CouponRuleName      string
+	DiscountAmount      float64
+	SubTotal            float64
 	SubTotalWithDiscount float64
-	OrderNote          string
-	ShippingMethod     string
-	ShippingFeeAmount  float64
-	TaxAmount          float64
-	PaymentMethod      string
-	PaymentFeeAmount   float64
+	OrderNote           string
+	ShippingMethod      string
+	ShippingFeeAmount   float64
+	TaxAmount           float64
+	PaymentMethod       string
+	PaymentFeeAmount    float64
 }
 
 type CreateOrderItemRequest struct {
-	ProductID      uint
+	ProductID      string
 	ProductName    string
 	ProductSKU     string
 	ProductPrice   float64

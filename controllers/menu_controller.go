@@ -22,7 +22,10 @@ func (h *MenuController) ListMenus(c fiber.Ctx) error {
 }
 
 func (h *MenuController) GetMenu(c fiber.Ctx) error {
-	menuID := parseUint(c.Params("id"))
+	menuID := c.Params("id")
+	if menuID == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"success": false, "error": "invalid menu id"})
+	}
 
 	menu, err := h.svc.MenuService.GetByID(c.Context(), menuID)
 	if err != nil {
@@ -51,7 +54,10 @@ func (h *MenuController) CreateMenu(c fiber.Ctx) error {
 }
 
 func (h *MenuController) UpdateMenu(c fiber.Ctx) error {
-	menuID := parseUint(c.Params("id"))
+	menuID := c.Params("id")
+	if menuID == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"success": false, "error": "invalid menu id"})
+	}
 
 	var req struct {
 		Name        string `json:"name"`
@@ -69,7 +75,10 @@ func (h *MenuController) UpdateMenu(c fiber.Ctx) error {
 }
 
 func (h *MenuController) DeleteMenu(c fiber.Ctx) error {
-	menuID := parseUint(c.Params("id"))
+	menuID := c.Params("id")
+	if menuID == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"success": false, "error": "invalid menu id"})
+	}
 
 	if err := h.svc.MenuService.Delete(c.Context(), menuID); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"success": false, "error": err.Error()})
@@ -78,14 +87,17 @@ func (h *MenuController) DeleteMenu(c fiber.Ctx) error {
 }
 
 func (h *MenuController) AddMenuItem(c fiber.Ctx) error {
-	menuID := parseUint(c.Params("id"))
+	menuID := c.Params("id")
+	if menuID == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"success": false, "error": "invalid menu id"})
+	}
 
 	var req struct {
-		ParentID     *uint  `json:"parentId"`
-		EntityID     *uint  `json:"entityId"`
-		CustomLink   string `json:"customLink"`
-		Name         string `json:"name"`
-		DisplayOrder int    `json:"displayOrder"`
+		ParentID     *string `json:"parentId"`
+		EntityID     *string `json:"entityId"`
+		CustomLink   string  `json:"customLink"`
+		Name         string  `json:"name"`
+		DisplayOrder int     `json:"displayOrder"`
 	}
 	if err := c.Bind().Body(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"success": false, "error": "invalid request body"})
@@ -99,14 +111,17 @@ func (h *MenuController) AddMenuItem(c fiber.Ctx) error {
 }
 
 func (h *MenuController) UpdateMenuItem(c fiber.Ctx) error {
-	itemID := parseUint(c.Params("id"))
+	itemID := c.Params("id")
+	if itemID == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"success": false, "error": "invalid menu item id"})
+	}
 
 	var req struct {
-		ParentID     *uint  `json:"parentId"`
-		EntityID     *uint  `json:"entityId"`
-		CustomLink   string `json:"customLink"`
-		Name         string `json:"name"`
-		DisplayOrder int    `json:"displayOrder"`
+		ParentID     *string `json:"parentId"`
+		EntityID     *string `json:"entityId"`
+		CustomLink   string  `json:"customLink"`
+		Name         string  `json:"name"`
+		DisplayOrder int     `json:"displayOrder"`
 	}
 	if err := c.Bind().Body(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"success": false, "error": "invalid request body"})
@@ -120,7 +135,10 @@ func (h *MenuController) UpdateMenuItem(c fiber.Ctx) error {
 }
 
 func (h *MenuController) DeleteMenuItem(c fiber.Ctx) error {
-	itemID := parseUint(c.Params("id"))
+	itemID := c.Params("id")
+	if itemID == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"success": false, "error": "invalid menu item id"})
+	}
 
 	if err := h.svc.MenuService.DeleteItem(c.Context(), itemID); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"success": false, "error": err.Error()})

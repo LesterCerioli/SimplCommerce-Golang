@@ -16,7 +16,7 @@ func NewMediaService(db *sql.DB) *MediaService {
 }
 
 type MediaResponse struct {
-	ID        uint      `json:"id"`
+	ID        string    `json:"id"`
 	Caption   string    `json:"caption"`
 	FileSize  int64     `json:"fileSize"`
 	FileName  string    `json:"fileName"`
@@ -56,7 +56,7 @@ func (s *MediaService) FindAll(ctx context.Context) ([]MediaResponse, error) {
 	return media, nil
 }
 
-func (s *MediaService) FindByID(ctx context.Context, id uint) (*MediaResponse, error) {
+func (s *MediaService) FindByID(ctx context.Context, id string) (*MediaResponse, error) {
 	var m MediaResponse
 	err := s.db.QueryRowContext(ctx, `
 		SELECT id, COALESCE(caption, ''), file_size, COALESCE(file_name, ''), media_type, created_at, updated_at
@@ -86,7 +86,7 @@ func (s *MediaService) Create(ctx context.Context, req CreateMediaRequest) (*Med
 	return &m, nil
 }
 
-func (s *MediaService) Delete(ctx context.Context, id uint) error {
+func (s *MediaService) Delete(ctx context.Context, id string) error {
 	result, err := s.db.ExecContext(ctx, `DELETE FROM identity_media WHERE id = $1`, id)
 	if err != nil {
 		return fmt.Errorf("failed to delete media: %w", err)

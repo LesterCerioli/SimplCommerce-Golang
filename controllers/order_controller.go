@@ -29,7 +29,7 @@ func (h *OrderController) ListOrders(c fiber.Ctx) error {
 		return c.JSON(fiber.Map{"success": true, "data": orders, "meta": fiber.Map{"page": page, "pageSize": pageSize, "totalItems": total}})
 	}
 
-	customerID := c.Locals("userID").(uint)
+	customerID := c.Locals("userID").(string)
 	orders, total, err := h.svc.OrderService.GetCustomerOrders(c.Context(), customerID, page, pageSize)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"success": false, "error": err.Error()})
@@ -38,11 +38,10 @@ func (h *OrderController) ListOrders(c fiber.Ctx) error {
 }
 
 func (h *OrderController) GetOrder(c fiber.Ctx) error {
-	customerID := c.Locals("userID").(uint)
+	customerID := c.Locals("userID").(string)
 	id := c.Params("id")
-	orderID := parseUint(id)
 
-	order, err := h.svc.OrderService.GetOrderByID(c.Context(), orderID, customerID)
+	order, err := h.svc.OrderService.GetOrderByID(c.Context(), id, customerID)
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"success": false, "error": err.Error()})
 	}
@@ -50,12 +49,12 @@ func (h *OrderController) GetOrder(c fiber.Ctx) error {
 }
 
 func (h *OrderController) CreateOrder(c fiber.Ctx) error {
-	customerID := c.Locals("userID").(uint)
+	customerID := c.Locals("userID").(string)
 
 	var req struct {
 		Items             []implementations.CreateOrderItemRequest `json:"items"`
-		ShippingAddressID uint                                   `json:"shippingAddressId"`
-		BillingAddressID  uint                                   `json:"billingAddressId"`
+		ShippingAddressID string                                 `json:"shippingAddressId"`
+		BillingAddressID  string                                 `json:"billingAddressId"`
 		CouponCode        string                                 `json:"couponCode"`
 		CouponRuleName    string                                 `json:"couponRuleName"`
 		DiscountAmount    float64                                `json:"discountAmount"`
@@ -77,20 +76,20 @@ func (h *OrderController) CreateOrder(c fiber.Ctx) error {
 	subTotalWithDiscount := subTotal - req.DiscountAmount
 
 	createReq := implementations.CreateOrderRequest{
-		Items:               req.Items,
-		ShippingAddressID:   req.ShippingAddressID,
-		BillingAddressID:    req.BillingAddressID,
-		CouponCode:          req.CouponCode,
-		CouponRuleName:      req.CouponRuleName,
-		DiscountAmount:      req.DiscountAmount,
-		SubTotal:            subTotal,
+		Items:                req.Items,
+		ShippingAddressID:    req.ShippingAddressID,
+		BillingAddressID:     req.BillingAddressID,
+		CouponCode:           req.CouponCode,
+		CouponRuleName:       req.CouponRuleName,
+		DiscountAmount:       req.DiscountAmount,
+		SubTotal:             subTotal,
 		SubTotalWithDiscount: subTotalWithDiscount,
-		OrderNote:           req.OrderNote,
-		ShippingMethod:      req.ShippingMethod,
-		ShippingFeeAmount:   req.ShippingFeeAmount,
-		TaxAmount:           req.TaxAmount,
-		PaymentMethod:       req.PaymentMethod,
-		PaymentFeeAmount:    req.PaymentFeeAmount,
+		OrderNote:            req.OrderNote,
+		ShippingMethod:       req.ShippingMethod,
+		ShippingFeeAmount:    req.ShippingFeeAmount,
+		TaxAmount:            req.TaxAmount,
+		PaymentMethod:        req.PaymentMethod,
+		PaymentFeeAmount:     req.PaymentFeeAmount,
 	}
 
 	order, err := h.svc.OrderService.CreateOrder(c.Context(), customerID, createReq)
@@ -102,8 +101,7 @@ func (h *OrderController) CreateOrder(c fiber.Ctx) error {
 
 func (h *OrderController) UpdateStatus(c fiber.Ctx) error {
 	id := c.Params("id")
-	orderID := parseUint(id)
-	updatedByID := c.Locals("userID").(uint)
+	updatedByID := c.Locals("userID").(string)
 
 	var req struct {
 		Status string `json:"status"`
@@ -115,7 +113,7 @@ func (h *OrderController) UpdateStatus(c fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"success": false, "error": "status is required"})
 	}
 
-	if err := h.svc.OrderService.UpdateStatus(c.Context(), orderID, req.Status, updatedByID); err != nil {
+	if err := h.svc.OrderService.UpdateStatus(c.Context(), id, req.Status, updatedByID); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"success": false, "error": err.Error()})
 	}
 	return c.JSON(fiber.Map{"success": true, "data": nil})

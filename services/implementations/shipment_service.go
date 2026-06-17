@@ -16,43 +16,43 @@ func NewShipmentService(db *sql.DB) *ShipmentService {
 }
 
 type ShipmentResponse struct {
-	ID             uint                  `json:"id"`
-	OrderID        uint                  `json:"orderId"`
+	ID             string                `json:"id"`
+	OrderID        string                `json:"orderId"`
 	TrackingNumber string                `json:"trackingNumber"`
-	WarehouseID    uint                  `json:"warehouseId"`
-	VendorID       *uint                 `json:"vendorId,omitempty"`
-	CreatedByID    uint                  `json:"createdById"`
+	WarehouseID    string                `json:"warehouseId"`
+	VendorID       *string               `json:"vendorId,omitempty"`
+	CreatedByID    string                `json:"createdById"`
 	CreatedAt      time.Time             `json:"createdAt"`
 	UpdatedAt      time.Time             `json:"updatedAt"`
 	Items          []ShipmentItemResponse `json:"items"`
 }
 
 type ShipmentItemResponse struct {
-	ID          uint `json:"id"`
-	ShipmentID  uint `json:"shipmentId"`
-	OrderItemID uint `json:"orderItemId"`
-	ProductID   uint `json:"productId"`
-	Quantity    int  `json:"quantity"`
+	ID          string `json:"id"`
+	ShipmentID  string `json:"shipmentId"`
+	OrderItemID string `json:"orderItemId"`
+	ProductID   string `json:"productId"`
+	Quantity    int    `json:"quantity"`
 }
 
 type CreateShipmentInput struct {
-	OrderID        uint                    `json:"orderId"`
-	TrackingNumber string                  `json:"trackingNumber"`
-	WarehouseID    uint                    `json:"warehouseId"`
-	Items          []ShipmentItemInput     `json:"items"`
+	OrderID        string              `json:"orderId"`
+	TrackingNumber string              `json:"trackingNumber"`
+	WarehouseID    string              `json:"warehouseId"`
+	Items          []ShipmentItemInput `json:"items"`
 }
 
 type ShipmentItemInput struct {
-	OrderItemID uint `json:"orderItemId"`
-	ProductID   uint `json:"productId"`
-	Quantity    int  `json:"quantity"`
+	OrderItemID string `json:"orderItemId"`
+	ProductID   string `json:"productId"`
+	Quantity    int    `json:"quantity"`
 }
 
-func (s *ShipmentService) CreateShipment(ctx context.Context, input CreateShipmentInput, createdByID uint) (*ShipmentResponse, error) {
-	if input.OrderID == 0 {
+func (s *ShipmentService) CreateShipment(ctx context.Context, input CreateShipmentInput, createdByID string) (*ShipmentResponse, error) {
+	if input.OrderID == "" {
 		return nil, fmt.Errorf("order id is required")
 	}
-	if input.WarehouseID == 0 {
+	if input.WarehouseID == "" {
 		return nil, fmt.Errorf("warehouse id is required")
 	}
 	if len(input.Items) == 0 {
@@ -65,7 +65,7 @@ func (s *ShipmentService) CreateShipment(ctx context.Context, input CreateShipme
 	}
 	defer tx.Rollback()
 
-	var shipmentID uint
+	var shipmentID string
 	var createdAt, updatedAt time.Time
 	err = tx.QueryRowContext(ctx, `
 		INSERT INTO shipping_shipments (order_id, tracking_number, warehouse_id, created_by_id, created_at, updated_at)
@@ -92,8 +92,8 @@ func (s *ShipmentService) CreateShipment(ctx context.Context, input CreateShipme
 	return s.GetShipment(ctx, shipmentID)
 }
 
-func (s *ShipmentService) GetShipment(ctx context.Context, id uint) (*ShipmentResponse, error) {
-	var vendorID sql.NullInt64
+func (s *ShipmentService) GetShipment(ctx context.Context, id string) (*ShipmentResponse, error) {
+	var vendorID sql.NullString
 	var sh ShipmentResponse
 	err := s.db.QueryRowContext(ctx, `
 		SELECT id, order_id, tracking_number, warehouse_id, vendor_id, created_by_id, created_at, updated_at
@@ -106,8 +106,7 @@ func (s *ShipmentService) GetShipment(ctx context.Context, id uint) (*ShipmentRe
 		return nil, fmt.Errorf("failed to get shipment: %w", err)
 	}
 	if vendorID.Valid {
-		v := uint(vendorID.Int64)
-		sh.VendorID = &v
+		sh.VendorID = &vendorID.String
 	}
 
 	rows, err := s.db.QueryContext(ctx, `
@@ -157,7 +156,7 @@ func (s *ShipmentService) ListShipments(ctx context.Context, page, pageSize int)
 
 	var shipments []ShipmentResponse
 	for rows.Next() {
-		var id uint
+		var id string
 		if err := rows.Scan(&id); err != nil {
 			return nil, 0, err
 		}

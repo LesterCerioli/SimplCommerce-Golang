@@ -14,7 +14,7 @@ func NewNotificationController(svc *initializers.Services) *NotificationControll
 }
 
 func (h *NotificationController) ListNotifications(c fiber.Ctx) error {
-	userID := c.Locals("userID").(uint)
+	userID := c.Locals("userID").(string)
 
 	notifications, err := h.svc.NotificationService.GetUserNotifications(c.Context(), userID)
 	if err != nil {
@@ -24,9 +24,12 @@ func (h *NotificationController) ListNotifications(c fiber.Ctx) error {
 }
 
 func (h *NotificationController) MarkAsRead(c fiber.Ctx) error {
-	userID := c.Locals("userID").(uint)
+	userID := c.Locals("userID").(string)
 
-	notifID := parseUint(c.Params("id"))
+	notifID := c.Params("id")
+	if notifID == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"success": false, "error": "invalid notification id"})
+	}
 
 	if err := h.svc.NotificationService.MarkAsRead(c.Context(), notifID, userID); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"success": false, "error": err.Error()})
@@ -35,7 +38,7 @@ func (h *NotificationController) MarkAsRead(c fiber.Ctx) error {
 }
 
 func (h *NotificationController) UnreadCount(c fiber.Ctx) error {
-	userID := c.Locals("userID").(uint)
+	userID := c.Locals("userID").(string)
 
 	count, err := h.svc.NotificationService.GetUnreadCount(c.Context(), userID)
 	if err != nil {

@@ -2,8 +2,8 @@ package entities
 
 type Activity struct {
 	BaseEntity
-	ActivityTypeID uint         `gorm:"not null;index"`
-	UserID         uint         `gorm:"index"`
+	ActivityTypeID string       `gorm:"type:uuid;not null;index"`
+	UserID         string       `gorm:"type:uuid;index"`
 	EntityID       uint
 	EntityTypeID   string       `gorm:"size:450"`
 	ActivityType   ActivityType `gorm:"foreignKey:ActivityTypeID"`

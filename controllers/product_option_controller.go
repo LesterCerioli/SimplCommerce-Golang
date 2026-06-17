@@ -1,8 +1,6 @@
 package controllers
 
 import (
-	"strconv"
-
 	"github.com/gofiber/fiber/v3"
 	"simplcommerce/internal/response"
 	"simplcommerce/services/implementations"
@@ -25,8 +23,8 @@ func NewProductTemplateController(service *implementations.ProductTemplateServic
 }
 
 func (h *ProductOptionController) Index(c fiber.Ctx) error {
-	page, _ := strconv.Atoi(c.Query("page", "1"))
-	pageSize, _ := strconv.Atoi(c.Query("pageSize", "20"))
+	page := parseInt(c.Query("page", "1"), 1)
+	pageSize := parseInt(c.Query("pageSize", "20"), 20)
 
 	options, total, err := h.service.GetOptions(c.Context(), page, pageSize)
 	if err != nil {
@@ -51,8 +49,8 @@ func (h *ProductOptionController) Create(c fiber.Ctx) error {
 }
 
 func (h *ProductOptionController) Update(c fiber.Ctx) error {
-	id, err := strconv.ParseUint(c.Params("id"), 10, 32)
-	if err != nil {
+	id := c.Params("id")
+	if id == "" {
 		return response.Error(fiber.StatusBadRequest, "invalid option id")
 	}
 
@@ -61,7 +59,7 @@ func (h *ProductOptionController) Update(c fiber.Ctx) error {
 		return response.Error(fiber.StatusBadRequest, "invalid request body")
 	}
 
-	option, err := h.service.UpdateOption(c.Context(), uint(id), &req)
+	option, err := h.service.UpdateOption(c.Context(), id, &req)
 	if err != nil {
 		return response.Error(fiber.StatusInternalServerError, err.Error())
 	}
@@ -70,12 +68,12 @@ func (h *ProductOptionController) Update(c fiber.Ctx) error {
 }
 
 func (h *ProductOptionController) Delete(c fiber.Ctx) error {
-	id, err := strconv.ParseUint(c.Params("id"), 10, 32)
-	if err != nil {
+	id := c.Params("id")
+	if id == "" {
 		return response.Error(fiber.StatusBadRequest, "invalid option id")
 	}
 
-	if err := h.service.DeleteOption(c.Context(), uint(id)); err != nil {
+	if err := h.service.DeleteOption(c.Context(), id); err != nil {
 		return response.Error(fiber.StatusInternalServerError, err.Error())
 	}
 
@@ -83,8 +81,8 @@ func (h *ProductOptionController) Delete(c fiber.Ctx) error {
 }
 
 func (h *ProductTemplateController) Index(c fiber.Ctx) error {
-	page, _ := strconv.Atoi(c.Query("page", "1"))
-	pageSize, _ := strconv.Atoi(c.Query("pageSize", "20"))
+	page := parseInt(c.Query("page", "1"), 1)
+	pageSize := parseInt(c.Query("pageSize", "20"), 20)
 
 	templates, total, err := h.service.GetTemplates(c.Context(), page, pageSize)
 	if err != nil {

@@ -2,8 +2,8 @@ package entities
 
 type Reply struct {
 	BaseEntity
-	ReviewID    uint   `gorm:"not null"`
-	UserID      uint   `gorm:"not null"`
+	ReviewID    string `gorm:"type:uuid;not null"`
+	UserID      string `gorm:"type:uuid;not null"`
 	Comment     string `gorm:"type:text"`
 	ReplierName string `gorm:"size:450"`
 	Status      string `gorm:"size:50;default:'Pending'"`

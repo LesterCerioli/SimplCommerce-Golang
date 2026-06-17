@@ -9,8 +9,8 @@ func (ProductOption) TableName() string { return "catalog_product_options" }
 
 type ProductOptionValue struct {
 	BaseEntity
-	OptionID    uint   `gorm:"not null"`
-	ProductID   uint   `gorm:"not null"`
+	OptionID    string `gorm:"type:uuid;not null"`
+	ProductID   string `gorm:"type:uuid;not null"`
 	Value       string `gorm:"size:450"`
 	DisplayType string `gorm:"size:50"`
 	SortIndex   int    `gorm:"default:0"`
@@ -22,8 +22,8 @@ func (ProductOptionValue) TableName() string { return "catalog_product_option_va
 
 type ProductOptionCombination struct {
 	BaseEntity
-	ProductID uint   `gorm:"not null"`
-	OptionID  uint   `gorm:"not null"`
+	ProductID string `gorm:"type:uuid;not null"`
+	OptionID  string `gorm:"type:uuid;not null"`
 	Value     string `gorm:"size:450"`
 	SortIndex int    `gorm:"default:0"`
 	Product   Product       `gorm:"foreignKey:ProductID"`

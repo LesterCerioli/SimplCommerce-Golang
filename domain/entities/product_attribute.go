@@ -3,7 +3,7 @@ package entities
 type ProductAttribute struct {
 	BaseEntity
 	Name    string `gorm:"size:450;not null"`
-	GroupID uint
+	GroupID string `gorm:"type:uuid"`
 	Group   ProductAttributeGroup `gorm:"foreignKey:GroupID"`
 }
 
@@ -19,8 +19,8 @@ func (ProductAttributeGroup) TableName() string { return "catalog_product_attrib
 
 type ProductAttributeValue struct {
 	BaseEntity
-	AttributeID uint   `gorm:"not null"`
-	ProductID   uint   `gorm:"not null"`
+	AttributeID string `gorm:"type:uuid;not null"`
+	ProductID   string `gorm:"type:uuid;not null"`
 	Value       string `gorm:"type:text"`
 	Attribute   ProductAttribute `gorm:"foreignKey:AttributeID"`
 	Product     Product          `gorm:"foreignKey:ProductID"`

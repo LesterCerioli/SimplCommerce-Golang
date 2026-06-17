@@ -23,7 +23,10 @@ func (h *PricingController) ListCartRules(c fiber.Ctx) error {
 }
 
 func (h *PricingController) GetCartRule(c fiber.Ctx) error {
-	ruleID := parseUint(c.Params("id"))
+	ruleID := c.Params("id")
+	if ruleID == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"success": false, "error": "invalid rule id"})
+	}
 
 	rule, err := h.svc.PricingService.GetCartRule(c.Context(), ruleID)
 	if err != nil {
@@ -46,7 +49,10 @@ func (h *PricingController) CreateCartRule(c fiber.Ctx) error {
 }
 
 func (h *PricingController) UpdateCartRule(c fiber.Ctx) error {
-	ruleID := parseUint(c.Params("id"))
+	ruleID := c.Params("id")
+	if ruleID == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"success": false, "error": "invalid rule id"})
+	}
 
 	var req implementations.CreateCartRuleRequest
 	if err := c.Bind().Body(&req); err != nil {
@@ -61,7 +67,10 @@ func (h *PricingController) UpdateCartRule(c fiber.Ctx) error {
 }
 
 func (h *PricingController) DeleteCartRule(c fiber.Ctx) error {
-	ruleID := parseUint(c.Params("id"))
+	ruleID := c.Params("id")
+	if ruleID == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"success": false, "error": "invalid rule id"})
+	}
 
 	if err := h.svc.PricingService.DeleteCartRule(c.Context(), ruleID); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"success": false, "error": err.Error()})
@@ -109,7 +118,10 @@ func (h *PricingController) CreateCatalogRule(c fiber.Ctx) error {
 }
 
 func (h *PricingController) UpdateCatalogRule(c fiber.Ctx) error {
-	ruleID := parseUint(c.Params("id"))
+	ruleID := c.Params("id")
+	if ruleID == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"success": false, "error": "invalid rule id"})
+	}
 
 	var req implementations.CreateCatalogRuleRequest
 	if err := c.Bind().Body(&req); err != nil {
@@ -124,7 +136,10 @@ func (h *PricingController) UpdateCatalogRule(c fiber.Ctx) error {
 }
 
 func (h *PricingController) DeleteCatalogRule(c fiber.Ctx) error {
-	ruleID := parseUint(c.Params("id"))
+	ruleID := c.Params("id")
+	if ruleID == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"success": false, "error": "invalid rule id"})
+	}
 
 	if err := h.svc.PricingService.DeleteCatalogRule(c.Context(), ruleID); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"success": false, "error": err.Error()})

@@ -1,8 +1,6 @@
 package controllers
 
 import (
-	"strconv"
-
 	"github.com/gofiber/fiber/v3"
 	"simplcommerce/services/implementations"
 )
@@ -43,8 +41,8 @@ func (ctrl *VendorController) Create(c fiber.Ctx) error {
 }
 
 func (ctrl *VendorController) Update(c fiber.Ctx) error {
-	id, err := strconv.ParseUint(c.Params("id"), 10, 32)
-	if err != nil {
+	id := c.Params("id")
+	if id == "" {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid vendor ID"})
 	}
 
@@ -53,7 +51,7 @@ func (ctrl *VendorController) Update(c fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request body"})
 	}
 
-	vendor, err := ctrl.vendorService.Update(c.Context(), uint(id), req)
+	vendor, err := ctrl.vendorService.Update(c.Context(), id, req)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
