@@ -21,6 +21,11 @@ func main() {
 
 	initializers.RunMigrations(db)
 
+	if len(os.Args) > 1 && os.Args[1] == "--migrate-only" {
+		log.Println("Migration completed. Exiting.")
+		return
+	}
+
 	svcs := initializers.InitServices(db)
 
 	app := fiber.New(fiber.Config{
