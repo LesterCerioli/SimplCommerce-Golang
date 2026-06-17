@@ -1,0 +1,42 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*/cmd/*/identityd
+*/cmd/*/catalogd
+*/cmd/*/cartd
+*/cmd/*/ordersd
+*/cmd/*/paymentd
+*/cmd/*/shippingd
+*/cmd/*/inventoryd
+*/cmd/*/pricingd
+*/cmd/*/reviewsd
+*/cmd/*/cmsd
+*/cmd/*/taxd
+*/cmd/*/activitylogd
+*/cmd/*/notificationsd
+*/cmd/*/searchd
+*/cmd/*/gatewayd
+
+# Test binary
+*.test
+
+# Go workspace
+go.work
+
+# Environment
+.env
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+postgres_data/
